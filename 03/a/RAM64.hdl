@@ -15,5 +15,35 @@ CHIP RAM64 {
     OUT out[16];
 
     PARTS:
-    // Put your code here:
+        // store addressing
+    DMux8Way(in=load, sel=address[0..3], a=loada, b=loadb, c=loadc, d=loadd, e=loade, f=loadf, g=loadg, h=loadh);
+
+    // register
+    Mux16(a=outa, b=in, sel=loada, out=ra);
+    RAM8(in=ra, load=loada, address=address[4..6], out=outa);
+
+    Mux16(a=outb, b=in, sel=loadb, out=rb);
+    RAM8(in=rb, load=loadb, address=address[4..6], out=outb);
+
+    Mux16(a=outc, b=in, sel=loadc, out=rc);   
+    RAM8(in=rc, load=loadc, address=address[4..6], out=outc);
+
+    Mux16(a=outd, b=in, sel=loadd, out=rd);   
+    RAM8(in=rd, load=loadd, address=address[4..6], out=outd);
+    
+    Mux16(a=oute, b=in, sel=loade, out=re);   
+    RAM8(in=re, load=loade, address=address[4..6], out=oute);
+    
+    Mux16(a=outf, b=in, sel=loadf, out=rf);   
+    RAM8(in=rf, load=loadf, address=address[4..6], out=outf);
+
+    Mux16(a=outg, b=in, sel=loadg, out=rg);   
+    RAM8(in=rg, load=loadg, address=address[4..6], out=outg);
+
+    Mux16(a=outh, b=in, sel=loadh, out=rh);   
+    RAM8(in=rh, load=loadh, address=address[4..6], out=outh);
+
+    // select output
+    Mux8Way16(a=outa, b=outb, c=outc, d=outd, e=oute, f=outf, g=outg, h=outh, sel=address, out=out);
+
 }
