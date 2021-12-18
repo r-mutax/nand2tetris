@@ -10,3 +10,33 @@
 // R0 >= 0, R1 >= 0, and R0*R1 < 32768.
 
 // Put your code here.
+
+    @0
+    D=A
+    @R2
+    M=D     // init R2 by 0
+    
+    @0      
+    D=A
+    @R3
+    M=D     // init R3 by 0
+(LOOP)
+    @R3
+    D=M
+    @R1
+    D=D-M   // R3-R1
+    @END
+    D;JGE
+
+    @R2
+    D=M
+    @R0
+    D=D+M
+    @R2
+    M=D     // R2 = R0 + R1
+
+    @R3
+    M=M+1
+    @LOOP
+    0;JMP
+(END)
