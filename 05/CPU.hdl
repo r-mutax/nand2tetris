@@ -39,5 +39,40 @@ CHIP CPU {
         pc[15];          // address of next instruction
 
     PARTS:
-    // Put your code here:
+
+    // ARegister
+    Mux16(a[0..14]=instruction[0..14], a[15]=false, b=outALU, sel=instruction[15], out=inAReg);
+    Mux(a=true, b=instruction[5], sel=instruction[15], out=loadAReg);
+    ARegister(in=inAReg, load=loadAReg, out=outAReg, out[0..14]=addressM);
+
+    // DRegister
+    Mux(a=false, b=instruction[4], sel=instruction[15], out=loadDReg);
+    DRegister(in=outALU, load=loadDReg, out=outDReg, out=inX);
+
+    // select A/M Register
+    Mux16(a=outAReg, b=inM, sel=instruction[12], out=inY);
+
+    // ALU
+    ALU(x=inX, y=inY, zx=instruction[11], nx=instruction[10], zy=instruction[9], ny=instruction[8], f=instruction[7], no=instruction[6], out=outALU, out=outM, zr=zr, ng=ng);
+
+    // write M
+    And(a=instruction[3], b=instruction[15], out=writeM);
+
+    // calc jump flg
+    Not(in=ng, out=pssub);
+    Not(in=zr, out=nzr);
+    And(a=nzr, b=pssub, out=ps);
+
+    And(a=instruction[2], b=ng, out=j1flg);
+    And(a=instruction[1], b=zr, out=j2flg);
+    And(a=instruction[0], b=ps, out=j3flg);
+    
+    Or8Way(in[0]=j1flg, in[1]=j2flg, in[2]=j3flg, in[3..7]=false, out=jmpflgsub);
+    Mux(a=false, b=jmpflgsub, sel=instruction[15], out=jmpflg);
+    Not(in=jmpflg, out=increg);
+
+    // ProgramCounter
+    PC(in=outAReg, load=jmpflg, inc=increg, reset=reset, out[0..14]=pc);
+
+
 }
