@@ -1,5 +1,5 @@
 #include "assembler.hpp"
-#include <stdio.h>
+
 
 int main(int argc, char **argv)
 {
@@ -9,5 +9,19 @@ int main(int argc, char **argv)
         return -1;
     }
     
+    try {
+        Parser  parser(argv[1]);
+
+        while(parser.hasMoreCommands())
+        {
+            std::cout << parser.getCommandsString() << std::endl;
+            parser.advance();
+        }
+    }
+    catch(std::invalid_argument& e){
+        fprintf(stderr, "[error] .asm file is not existed.\n");
+        return -1;
+    }
+
     return 0;    
 }
