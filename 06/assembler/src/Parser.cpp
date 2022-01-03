@@ -17,7 +17,6 @@ Parser::Parser(std::string asm_file_path){
         return;
     }
 
-    // ファイルが開けたら1行読んでおく
     readCommand();
 }
 
@@ -31,6 +30,14 @@ std::string Parser::getCommandsString(){
 
 void Parser::advance(){
     readCommand();
+}
+
+Parser::COMMAND_TYPE Parser::commandType(){
+    return m_command_type;
+}
+
+std::string Parser::symbol(){
+    return m_current_symbol;
 }
 
 void Parser::readCommand(){
@@ -51,6 +58,8 @@ void Parser::readCommand(){
     }
 
     m_cur_command = s;
+
+    analyzeCommand();
 }
 
 void Parser::readLine(std::string& s){
@@ -67,4 +76,17 @@ void Parser::readLine(std::string& s){
 void Parser::removeComment(std::string& s)
 {
     s = s.substr(0, s.find_first_of(std::string("//")));
+}
+
+void Parser::analyzeCommand()
+{
+    if(m_cur_command[0] == '@'){
+        m_command_type = A_COMMAND;
+        m_current_symbol = m_cur_command.substr(1, m_cur_command.size() - 1);
+    } else if(m_cur_command[0] == '('){
+        m_command_type = L_COMMAND;
+        m_current_symbol = m_cur_command.substr(1, m_cur_command.size() - 2);
+    } else {
+        m_command_type = FORMAT_ERROR;
+    }
 }

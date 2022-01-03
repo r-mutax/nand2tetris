@@ -15,7 +15,18 @@ int main(int argc, char **argv)
         while(parser.hasMoreCommands())
         {
             try{
-                std::cout << parser.getCommandsString() << std::endl;
+
+                switch (parser.commandType())
+                {
+                case Parser::A_COMMAND:
+                    std::cout << parser.symbol() << std::endl;
+                    break;
+                
+                default:
+                    break;
+                }
+
+                // std::cout << parser.getCommandsString() << std::endl;
                 parser.advance();
             } catch(std::out_of_range& e) {
                 break;
