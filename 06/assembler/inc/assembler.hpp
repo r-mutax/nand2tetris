@@ -11,8 +11,9 @@ class Parser{
     std::ifstream   m_ifs;
     bool            m_eof;
     std::string     m_cur_command;
-
-    void readLine();
+    void readCommand();
+    void readLine(std::string& s);
+    void removeComment(std::string& s);
 public:
     Parser(std::string asm_file_path);
     bool hasMoreCommands();
