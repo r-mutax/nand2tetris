@@ -1,6 +1,6 @@
 # -Wall -Wextra -Winit-self -Wno-missing-field-initializers
 COMPILER	= g++
-CFLAGS    = -g -MMD -MP -std=c++11
+CFLAGS    = -g -MMD -MP -std=c++17
 INCDIR		= -I./inc
 TARGET		= ./bin/$(shell basename `readlink -f .`)
 SRCDIR		= ./src
