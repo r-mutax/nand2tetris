@@ -103,7 +103,7 @@ std::string Code::jump(std::string code){
 }
 
 std::string Code::symbol(std::string code){
-    int16_t address = stoi(code);
+    int64_t address = stoll(code);
 
     std::stringstream ss;
     ss << std::bitset<15>(address);

@@ -42,6 +42,7 @@ public:
     std::string dest();
     std::string comp();
     std::string jump();
+    void reset();
 };
 
 class Code{
@@ -66,6 +67,10 @@ class SymbolTable{
     std::map<std::string, int64_t>      m_table;
 public:
     SymbolTable();
+    bool contains(std::string symbol);
+    int64_t getAddress(std::string symbol);
+    void addEntry(std::string symbol, int64_t address);
+    void addVariable(std::string symbol);
 };
 
 #endif

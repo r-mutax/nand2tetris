@@ -28,3 +28,21 @@ SymbolTable::SymbolTable(){
     m_table["R14"] = 0x000E;
     m_table["R15"] = 0x000F;    
 }
+
+bool SymbolTable::contains(std::string symbol){
+
+    return m_table.count(symbol) == 1;
+}
+
+int64_t SymbolTable::getAddress(std::string symbol){
+    return m_table[symbol];
+}
+
+void SymbolTable::addEntry(std::string symbol, int64_t address){
+    m_table[symbol] = address;
+}
+
+void SymbolTable::addVariable(std::string symbol){
+    static long var_address = 16;
+    m_table[symbol] = var_address++;
+}

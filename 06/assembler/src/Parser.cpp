@@ -2,11 +2,16 @@
 #include <algorithm>
 #include <cctype>
 
-static inline void ltrim(std::string& s)
-{
+static inline void ltrim(std::string& s){
     s.erase(s.begin(), std::find_if(s.begin(), s.end(), [](char ch){
         return !std::isspace(ch);
     }));
+}
+
+static inline void rtrim(std::string& s){
+    s.erase(std::find_if(s.rbegin(),s.rend(), [](char ch){
+        return !std::isspace(ch);
+    }).base(), s.end());
 }
 
 Parser::Parser(std::string asm_file_path){
@@ -14,6 +19,7 @@ Parser::Parser(std::string asm_file_path){
 
     if(!m_ifs){
         throw std::invalid_argument(".asm file is not existed.");
+        std::cerr << "here" << std::endl;
         return;
     }
 
@@ -52,13 +58,19 @@ std::string Parser::jump(){
     return m_cur_jump;
 }
 
+void Parser::reset(){
+    m_ifs.clear();
+    m_ifs.seekg(0, std::ios_base::beg);
+    readCommand();
+}
+
 void Parser::readCommand(){
     std::string s;
 
     while(1){
         try{
             readLine(s);
-            removeComment(s);
+            
             if(s == ""){
                 continue;
             }
@@ -82,10 +94,14 @@ void Parser::readLine(std::string& s){
     }
 
     ltrim(s);
+    removeComment(s);
+    rtrim(s);
     
     // remove CR
     // when use gcc, std::getline() function remove only LF at end of the line.
-    s = s.substr(0, s.length() - 1);
+    if(s[s.length()-1] == '\r'){
+        s = s.substr(0, s.length() - 1);
+    }
     
     return;
 }
