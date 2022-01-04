@@ -43,4 +43,11 @@ public:
     std::string jump();
 };
 
+class Code{
+public:
+    std::string dest(std::string code);
+    std::string comp(std::string code);
+    std::string jump(std::string code);
+};
+
 #endif

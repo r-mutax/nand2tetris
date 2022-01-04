@@ -11,20 +11,29 @@ int main(int argc, char **argv)
     
     try {
         Parser  parser(argv[1]);
+        Code    code;
 
         while(parser.hasMoreCommands())
         {
             try{
-
                 switch (parser.commandType())
                 {
                 case Parser::A_COMMAND:
                     std::cout << parser.symbol() << std::endl;
                     break;
                 case Parser::C_COMMAND:
-                    std::cout << "dest : " << parser.dest() << std::endl;
-                    std::cout << "comp : " << parser.comp() << std::endl;
-                    std::cout << "jump : " << parser.jump() << std::endl;
+                    {
+                        std::string d = code.dest(parser.dest());
+                        std::string c = code.comp(parser.comp());
+                        std::string j = code.jump(parser.jump());
+
+                        std::cout << "111" << d << c << j << std::endl;
+                    }
+                    // std::cout << parser.getCommandsString() << std::endl;
+
+                    // std::cout << "dest : " << code.dest(parser.dest()) << std::endl;
+                    // std::cout << "comp : " << code.comp(parser.comp()) << std::endl;
+                    // std::cout << "jump : " << code.jump(parser.jump()) << std::endl;
                     break;
                 case Parser::L_COMMAND:
                     break;
@@ -32,7 +41,6 @@ int main(int argc, char **argv)
                     break;
                 }
 
-                // std::cout << parser.getCommandsString() << std::endl;
                 parser.advance();
             } catch(std::out_of_range& e) {
                 break;

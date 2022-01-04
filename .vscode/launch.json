@@ -9,7 +9,7 @@
             "type": "cppdbg",
             "request": "launch",
             "program": "${command:extension.vscode-wsl-workspaceFolder}/06/assembler/bin/assembler",
-            "args": ["../add/Add.asm"],
+            "args": ["../max/MaxL.asm"],
             "stopAtEntry": false,
             "cwd": "${command:extension.vscode-wsl-workspaceFolder}/06/assembler",
             "environment": [],

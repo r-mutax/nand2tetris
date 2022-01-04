@@ -82,6 +82,11 @@ void Parser::readLine(std::string& s){
     }
 
     ltrim(s);
+    
+    // remove CR
+    // when use gcc, std::getline() function remove only LF at end of the line.
+    s = s.substr(0, s.length() - 1);
+    
     return;
 }
 
@@ -104,16 +109,17 @@ void Parser::analyzeCommand()
         }
     } else {
         // read dest
-        size_t eq_pos = m_cur_command.find('=');
+        long eq_pos = m_cur_command.find('=');
         if(eq_pos != std::string::npos){
             m_cur_dest = m_cur_command.substr(0, eq_pos);
+            eq_pos++;
         } else {
-            eq_pos = -1;
+            eq_pos = 0;
             m_cur_dest = "";
         }
 
         // read jump
-        size_t jp_pos = m_cur_command.find(';');
+        long jp_pos = m_cur_command.find(';');
         if(jp_pos != std::string::npos){
             m_cur_jump = m_cur_command.substr(jp_pos + 1, m_cur_command.length() - jp_pos);
         } else {
@@ -122,7 +128,7 @@ void Parser::analyzeCommand()
         }
 
         // read comp
-        m_cur_comp = m_cur_command.substr(eq_pos + 1, jp_pos - eq_pos - 1);
+        m_cur_comp = m_cur_command.substr(eq_pos, jp_pos - eq_pos);
 
         m_command_type = C_COMMAND;
     }
