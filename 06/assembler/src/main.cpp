@@ -21,7 +21,13 @@ int main(int argc, char **argv)
                 case Parser::A_COMMAND:
                     std::cout << parser.symbol() << std::endl;
                     break;
-                
+                case Parser::C_COMMAND:
+                    std::cout << "dest : " << parser.dest() << std::endl;
+                    std::cout << "comp : " << parser.comp() << std::endl;
+                    std::cout << "jump : " << parser.jump() << std::endl;
+                    break;
+                case Parser::L_COMMAND:
+                    break;
                 default:
                     break;
                 }

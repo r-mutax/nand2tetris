@@ -40,6 +40,18 @@ std::string Parser::symbol(){
     return m_current_symbol;
 }
 
+std::string Parser::dest(){
+    return m_cur_dest;
+}
+
+std::string Parser::comp(){
+    return m_cur_comp;
+}
+
+std::string Parser::jump(){
+    return m_cur_jump;
+}
+
 void Parser::readCommand(){
     std::string s;
 
@@ -84,9 +96,34 @@ void Parser::analyzeCommand()
         m_command_type = A_COMMAND;
         m_current_symbol = m_cur_command.substr(1, m_cur_command.size() - 1);
     } else if(m_cur_command[0] == '('){
-        m_command_type = L_COMMAND;
-        m_current_symbol = m_cur_command.substr(1, m_cur_command.size() - 2);
+        if(m_cur_command[m_cur_command.length() - 1] == ')'){
+            m_command_type = L_COMMAND;
+            m_current_symbol = m_cur_command.substr(1, m_cur_command.size() - 2);
+        } else {
+            m_command_type = FORMAT_ERROR;
+        }
     } else {
-        m_command_type = FORMAT_ERROR;
+        // read dest
+        size_t eq_pos = m_cur_command.find('=');
+        if(eq_pos != std::string::npos){
+            m_cur_dest = m_cur_command.substr(0, eq_pos);
+        } else {
+            eq_pos = -1;
+            m_cur_dest = "";
+        }
+
+        // read jump
+        size_t jp_pos = m_cur_command.find(';');
+        if(jp_pos != std::string::npos){
+            m_cur_jump = m_cur_command.substr(jp_pos + 1, m_cur_command.length() - jp_pos);
+        } else {
+            jp_pos = m_cur_command.length();
+            m_cur_jump = "";
+        }
+
+        // read comp
+        m_cur_comp = m_cur_command.substr(eq_pos + 1, jp_pos - eq_pos - 1);
+
+        m_command_type = C_COMMAND;
     }
 }

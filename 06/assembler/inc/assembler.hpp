@@ -21,6 +21,9 @@ private:
     bool            m_eof;
     std::string     m_cur_command;
     std::string     m_current_symbol;
+    std::string     m_cur_dest;
+    std::string     m_cur_comp;
+    std::string     m_cur_jump;
     COMMAND_TYPE    m_command_type;
 
     void readCommand();
@@ -35,6 +38,9 @@ public:
     COMMAND_TYPE commandType();
     std::string getCommandsString();
     std::string symbol();
+    std::string dest();
+    std::string comp();
+    std::string jump();
 };
 
 #endif
