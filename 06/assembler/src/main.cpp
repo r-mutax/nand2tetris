@@ -19,7 +19,7 @@ int main(int argc, char **argv)
                 switch (parser.commandType())
                 {
                 case Parser::A_COMMAND:
-                    std::cout << parser.symbol() << std::endl;
+                    std::cout << "0" << code.symbol(parser.symbol()) << std::endl;
                     break;
                 case Parser::C_COMMAND:
                     {
@@ -27,7 +27,7 @@ int main(int argc, char **argv)
                         std::string c = code.comp(parser.comp());
                         std::string j = code.jump(parser.jump());
 
-                        std::cout << "111" << d << c << j << std::endl;
+                        std::cout << "111" << c << d << j << std::endl;
                     }
                     // std::cout << parser.getCommandsString() << std::endl;
 

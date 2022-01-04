@@ -1,4 +1,6 @@
 #include "assembler.hpp"
+#include <sstream>
+#include <bitset>
 
 std::string Code::dest(std::string code)
 {
@@ -98,4 +100,13 @@ std::string Code::jump(std::string code){
     }
 
     return ret;
+}
+
+std::string Code::symbol(std::string code){
+    int16_t address = stoi(code);
+
+    std::stringstream ss;
+    ss << std::bitset<15>(address);
+
+    return ss.str();
 }

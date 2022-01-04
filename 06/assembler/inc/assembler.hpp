@@ -48,6 +48,7 @@ public:
     std::string dest(std::string code);
     std::string comp(std::string code);
     std::string jump(std::string code);
+    std::string symbol(std::string code);
 };
 
 #endif
