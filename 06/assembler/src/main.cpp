@@ -12,6 +12,7 @@ int main(int argc, char **argv)
     try {
         Parser  parser(argv[1]);
         Code    code;
+        HackFileIO  hackio(argv[1]);
 
         while(parser.hasMoreCommands())
         {
@@ -19,7 +20,7 @@ int main(int argc, char **argv)
                 switch (parser.commandType())
                 {
                 case Parser::A_COMMAND:
-                    std::cout << "0" << code.symbol(parser.symbol()) << std::endl;
+                    hackio << "0" << code.symbol(parser.symbol()) << "\r\n";
                     break;
                 case Parser::C_COMMAND:
                     {
@@ -27,7 +28,7 @@ int main(int argc, char **argv)
                         std::string c = code.comp(parser.comp());
                         std::string j = code.jump(parser.jump());
 
-                        std::cout << "111" << c << d << j << std::endl;
+                        hackio << "111" << c << d << j << "\r\n";
                     }
                     // std::cout << parser.getCommandsString() << std::endl;
 
@@ -47,7 +48,7 @@ int main(int argc, char **argv)
             }
         }
     } catch(std::invalid_argument& e){
-        std::cerr << "[error] .asm file is not existed.\n";
+        std::cerr << e.what();
         return -1;
     } catch(std::out_of_range& e){
         std::cerr << "[error] .asm file doesn't has Command.\n";

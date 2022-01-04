@@ -51,4 +51,14 @@ public:
     std::string symbol(std::string code);
 };
 
+class HackFileIO{
+    std::ofstream       m_ofs;
+public:
+    HackFileIO(std::string asm_file_path);
+    HackFileIO& operator<<(std::string str){
+        m_ofs << str;
+        return *this;
+    }
+};
+
 #endif
