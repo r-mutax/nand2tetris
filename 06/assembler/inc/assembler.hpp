@@ -6,6 +6,7 @@
 #include <fstream>
 #include <string>
 #include <stdexcept>
+#include <map>
 
 class Parser{
 public:
@@ -59,6 +60,12 @@ public:
         m_ofs << str;
         return *this;
     }
+};
+
+class SymbolTable{
+    std::map<std::string, int64_t>      m_table;
+public:
+    SymbolTable();
 };
 
 #endif
