@@ -8,10 +8,10 @@
             "name": "(gdb) アセンブラでバッグ実行",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${command:extension.vscode-wsl-workspaceFolder}/06/assembler/bin/assembler",
-            "args": ["../rect/Rect.asm"],
+            "program": "${command:extension.vscode-wsl-workspaceFolder}/SW/assembler/bin/assembler",
+            "args": ["../../06/rect/Rect.asm"],
             "stopAtEntry": false,
-            "cwd": "${command:extension.vscode-wsl-workspaceFolder}/06/assembler",
+            "cwd": "${command:extension.vscode-wsl-workspaceFolder}/SW/assembler",
             "environment": [],
             "externalConsole": false,   // 標準入力を受け付けるコンソールを表示するか？
             "pipeTransport": {

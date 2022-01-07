@@ -1,4 +1,4 @@
 *.out
 *.hack
-06/assembler/bin/*
-06/assembler/load/*
+SW/assembler/bin/*
+SW/assembler/load/*
