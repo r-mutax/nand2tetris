@@ -2,3 +2,5 @@
 *.hack
 SW/assembler/bin/*
 SW/assembler/load/*
+SW/VM/bin/*
+SW/VM/load/*

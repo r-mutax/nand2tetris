@@ -10,8 +10,19 @@
             "problemMatcher": [],
             "group": "build",
             "options": {
-                "cwd": "${workspaceFolder}/06/assembler"
+                "cwd": "${workspaceFolder}/SW/assembler"
+            }
+        },
+        {
+            "label": "build VM",
+            "type": "shell",
+            "command": "make",
+            "problemMatcher": [],
+            "group": "build",
+            "options": {
+                "cwd": "${workspaceFolder}/SW/VM"
             }
         }
+
     ]
 }
