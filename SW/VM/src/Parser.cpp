@@ -119,12 +119,19 @@ void Parser::analyzeCommand(){
     // split command
     auto buf = split(m_cur_command);
 
+    // command type
     m_command = buf[0];
+    analyzeCommandType();
 
     if(buf.size() > 1){
         m_arg1 = buf[1];
     } else {
+
         m_arg1 = "";
+    }
+
+    if(m_command_type == C_ARITHEMIC){
+        m_arg1 = buf[0];
     }
 
     if(buf.size() > 2){
@@ -132,8 +139,6 @@ void Parser::analyzeCommand(){
     } else {
         m_arg2 = "";
     }
-
-    analyzeCommandType();
 }
 
 void Parser::analyzeCommandType(){
