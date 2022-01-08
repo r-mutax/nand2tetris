@@ -21,9 +21,10 @@ public:
         , C_CALL
     };
 private:
-    std::ifstream       m_ifs;
-    std::string         m_cur_command;
-    bool                m_eof;
+    std::ifstream              m_ifs;
+    std::string                m_cur_command;
+    bool                       m_eof;
+    Parser::COMMAND_TYPE       m_command_type;
 
     void readCommand();
     void readLine(std::string& s);
@@ -32,6 +33,7 @@ public:
     Parser(std::string vm_file_path);
     bool hasMoreCommands();
     void advance();
+    Parser::COMMAND_TYPE commandType();
 };
 
 #endif

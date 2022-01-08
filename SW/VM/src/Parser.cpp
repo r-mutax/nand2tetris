@@ -36,6 +36,10 @@ void Parser::advance(){
     readCommand();
 }
 
+Parser::COMMAND_TYPE Parser::commandType(){
+    return m_command_type;
+}
+
 // ---------------------------------------------------------
 // private member
 void Parser::readCommand(){
