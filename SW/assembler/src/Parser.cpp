@@ -19,7 +19,6 @@ Parser::Parser(std::string asm_file_path){
 
     if(!m_ifs){
         throw std::invalid_argument(".asm file is not existed.");
-        std::cerr << "here" << std::endl;
         return;
     }
 

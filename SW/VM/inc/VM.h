@@ -22,10 +22,16 @@ public:
     };
 private:
     std::ifstream       m_ifs;
+    std::string         m_cur_command;
+    bool                m_eof;
 
+    void readCommand();
+    void readLine(std::string& s);
+    void removeComment(std::string& s);
 public:
     Parser(std::string vm_file_path);
     bool hasMoreCommands();
+    void advance();
 };
 
 #endif
