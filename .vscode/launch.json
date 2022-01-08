@@ -9,7 +9,7 @@
             "type": "cppdbg",
             "request": "launch",
             "program": "${command:extension.vscode-wsl-workspaceFolder}/SW/VM/bin/vm",
-            "args": ["../../StackArithmetic/SimpleAdd/SimpleAdd.vm"],
+            "args": ["../../07/StackArithmetic/SimpleAdd/SimpleAdd.vm"],
             "stopAtEntry": true,
             "cwd": "${command:extension.vscode-wsl-workspaceFolder}/SW/VM",
             "environment": [],
