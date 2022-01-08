@@ -1,6 +1,7 @@
 #include "VM.h"
 #include <cctype>
 #include <algorithm>
+#include <sstream>
 
 static inline void ltrim(std::string& s){
     s.erase(s.begin(), std::find_if(s.begin(), s.end(), [](char ch){
@@ -12,6 +13,27 @@ static inline void rtrim(std::string& s){
     s.erase(std::find_if(s.rbegin(),s.rend(), [](char ch){
         return !std::isspace(ch);
     }).base(), s.end());
+}
+
+static inline std::vector<std::string> split(std::string str)
+{
+    std::vector<std::string> elems;
+    std::string item = "";
+
+    for(char c : str){
+        if(isspace(c)){
+            elems.emplace_back(item);
+            item = "";
+        } else {
+            item = item + c;
+        }
+    }
+
+    if(!item.empty()){
+        elems.emplace_back(item);
+    }
+
+    return elems;
 }
 
 // ---------------------------------------------------------
@@ -50,6 +72,7 @@ void Parser::readCommand(){
             if(s == ""){
                 continue;
             }
+            break;
         } catch(std::out_of_range &e){
             throw e;
             return;
@@ -57,6 +80,8 @@ void Parser::readCommand(){
     }
 
     m_cur_command = s;
+
+    analyzeCommand();
 }
 
 void Parser::removeComment(std::string& s)
@@ -79,5 +104,50 @@ void Parser::readLine(std::string& s){
     // when use gcc, std::getline() function remove only LF at end of the line.
     if(s[s.length()-1] == '\r'){
         s = s.substr(0, s.length() - 1);
+    }
+}
+
+void Parser::analyzeCommand(){
+    // split command
+    auto buf = split(m_cur_command);
+
+    m_command = buf[0];
+
+    if(buf.size() > 1){
+        m_arg1 = buf[1];
+    } else {
+        m_arg1 = "";
+    }
+
+    if(buf.size() > 2){
+        m_arg2 = buf[2];
+    } else {
+        m_arg2 = "";
+    }
+
+    analyzeCommandType();
+}
+
+void Parser::analyzeCommandType(){
+    if(
+        (m_command == "add")
+        || (m_command == "sub")
+        || (m_command == "neg")
+        || (m_command == "eq")
+        || (m_command == "gt")
+        || (m_command == "lt")
+        || (m_command == "and")
+        || (m_command == "or")
+        || (m_command == "Not")
+    ){
+        m_command_type = C_ARITHEMIC;
+    } else if(
+        (m_command == "push")
+    ){
+        m_command_type = C_PUSH;
+    } else if(
+        (m_command == "pop")
+    ){
+        m_command_type = C_POP;
     }
 }

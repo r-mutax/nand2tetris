@@ -23,12 +23,18 @@ public:
 private:
     std::ifstream              m_ifs;
     std::string                m_cur_command;
+    std::string                m_command;
+    std::string                m_arg1;
+    std::string                m_arg2;
+
     bool                       m_eof;
     Parser::COMMAND_TYPE       m_command_type;
 
     void readCommand();
     void readLine(std::string& s);
     void removeComment(std::string& s);
+    void analyzeCommand();
+    void analyzeCommandType();
 public:
     Parser(std::string vm_file_path);
     bool hasMoreCommands();
