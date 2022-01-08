@@ -5,24 +5,24 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "(gdb) アセンブラでバッグ実行",
+            "name": "(gdb) Bash on Windows の起動",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${command:extension.vscode-wsl-workspaceFolder}/SW/assembler/bin/assembler",
-            "args": ["../../06/rect/Rect.asm"],
-            "stopAtEntry": false,
-            "cwd": "${command:extension.vscode-wsl-workspaceFolder}/SW/assembler",
+            "program": "${command:extension.vscode-wsl-workspaceFolder}/SW/VM/bin/vm",
+            "args": ["../../StackArithmetic/SimpleAdd/SimpleAdd.vm"],
+            "stopAtEntry": true,
+            "cwd": "${command:extension.vscode-wsl-workspaceFolder}/SW/VM",
             "environment": [],
-            "externalConsole": false,   // 標準入力を受け付けるコンソールを表示するか？
+            "externalConsole": false,
             "pipeTransport": {
                 "debuggerPath": "/usr/bin/gdb",
                 "pipeProgram": "${env:windir}\\system32\\bash.exe",
                 "pipeArgs": ["-c"],
-                "pipeCwd": "/"
+                "pipeCwd": ""
             },
             "setupCommands": [
                 {
-                    "description": "Enable pretty-printing for gdb",
+                    "description": "gdb の再フォーマットを有効にする",
                     "text": "-enable-pretty-printing",
                     "ignoreFailures": true
                 }
@@ -31,5 +31,34 @@
                 "${command:extension.vscode-wsl-workspaceFolder}": "${workspaceFolder}"
             }
         }
+        // },
+        
+        // {
+        //     "name": "(gdb) アセンブラでバッグ実行",
+        //     "type": "cppdbg",
+        //     "request": "launch",
+        //     "program": "${command:extension.vscode-wsl-workspaceFolder}/SW/assembler/bin/assembler",
+        //     "args": ["../../06/rect/Rect.asm"],
+        //     "stopAtEntry": false,
+        //     "cwd": "${command:extension.vscode-wsl-workspaceFolder}/SW/assembler",
+        //     "environment": [],
+        //     "externalConsole": false,   // 標準入力を受け付けるコンソールを表示するか？
+        //     "pipeTransport": {
+        //         "debuggerPath": "/usr/bin/gdb",
+        //         "pipeProgram": "${env:windir}\\system32\\bash.exe",
+        //         "pipeArgs": ["-c"],
+        //         "pipeCwd": "/"
+        //     },
+        //     "setupCommands": [
+        //         {
+        //             "description": "Enable pretty-printing for gdb",
+        //             "text": "-enable-pretty-printing",
+        //             "ignoreFailures": true
+        //         }
+        //     ],
+        //     "sourceFileMap": {
+        //         "${command:extension.vscode-wsl-workspaceFolder}": "${workspaceFolder}"
+        //     }
+        // }
     ]
 }
