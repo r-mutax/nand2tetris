@@ -40,6 +40,8 @@ public:
     bool hasMoreCommands();
     void advance();
     Parser::COMMAND_TYPE commandType();
+    std::string arg1();
+    std::string arg2();
 };
 
 #endif

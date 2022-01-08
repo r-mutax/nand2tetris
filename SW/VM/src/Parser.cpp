@@ -62,6 +62,14 @@ Parser::COMMAND_TYPE Parser::commandType(){
     return m_command_type;
 }
 
+std::string Parser::arg1(){
+    return m_arg1;
+}
+
+std::string Parser::arg2(){
+    return m_arg2;
+}
+
 // ---------------------------------------------------------
 // private member
 void Parser::readCommand(){
