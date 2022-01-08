@@ -38,6 +38,7 @@ int main(int argc, char **argv)
             } catch (std::exception &e){
 
             }
+            parser.advance();
         }
 
     } catch (std::exception &e){
