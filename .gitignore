@@ -1,5 +1,7 @@
 *.out
 *.hack
+07/StackArithmetic/SimpleAdd/*.asm
+07/StackArithmetic/StackTest/*.asm
 SW/assembler/bin/*
 SW/assembler/load/*
 SW/VM/bin/*
