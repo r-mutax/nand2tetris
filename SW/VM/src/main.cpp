@@ -9,14 +9,17 @@ int main(int argc, char **argv)
 
     try {
         Parser  parser(argv[1]);
+        CodeWriter codewriter((argv[1] + std::string(".asm")));
 
         while(parser.hasMoreCommands())
         {
             try{
                 switch(parser.commandType()){
                     case Parser::C_ARITHEMIC:
+                        codewriter.writeArithmetic(parser.arg1());
                         break;
                     case Parser::C_PUSH:
+                        codewriter.writePushPop(Parser::C_PUSH, parser.arg1(), parser.arg2());
                         break;
                     case Parser::C_POP:
                         break;

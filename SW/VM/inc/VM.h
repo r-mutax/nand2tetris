@@ -44,4 +44,17 @@ public:
     std::string arg2();
 };
 
+class CodeWriter{
+private:
+    std::ofstream           m_ofs;
+
+    void push_stack();
+    void pop_stack();
+    void prologue();
+public:
+    CodeWriter(std::string asm_file_path);
+    void writeArithmetic(std::string command);
+    void writePushPop(Parser::COMMAND_TYPE command, std::string segment, std::string index);
+};
+
 #endif
