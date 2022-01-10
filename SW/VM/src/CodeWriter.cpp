@@ -16,8 +16,17 @@ void CodeWriter::writeArithmetic(std::string command){
         pop_stack();
         m_ofs << "D=D+M\n";
         push_stack();
+    } else if(command == "sub"){
+        pop_stack();
+        m_ofs << "D=M\n";
+        pop_stack();
+        m_ofs << "D=M-D\n";
+        push_stack();
+    } else if(command == "neg"){
+        pop_stack();
+        m_ofs << "D=-D\n";
+        push_stack();
     }
-
 }
 
 void CodeWriter::writePushPop(Parser::COMMAND_TYPE command, std::string segment, std::string index){
