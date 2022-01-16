@@ -26,6 +26,24 @@ void CodeWriter::writeArithmetic(std::string command){
         pop_stack();
         m_ofs << "D=-D\n";
         push_stack();
+    } else if(command == "eq"){
+        int64_t label = getlabel();
+
+        pop_stack();
+        m_ofs << "D=M\n";
+        pop_stack();
+        m_ofs << "D-M;JEQ\n";
+
+        // false
+        m_ofs << "@0\n";
+        m_ofs << "D=A\n";
+        push_stack();
+        
+        // true
+        m_ofs << "(" << label << ".TRUE)\n";
+        m_ofs << "@-1\n";
+        m_ofs << "D=A\n";
+        push_stack();
     }
 }
 
@@ -68,4 +86,9 @@ void CodeWriter::prologue(){
     m_ofs << "D=A\n";
     m_ofs << "@SP\n";
     m_ofs << "M=D\n";
+}
+
+int64_t CodeWriter::getlabel()
+{
+    return m_label++;
 }

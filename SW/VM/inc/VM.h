@@ -47,10 +47,14 @@ public:
 class CodeWriter{
 private:
     std::ofstream           m_ofs;
+    std::string             m_filename;
+    std::string             m_funcname;
+    int64_t                 m_label;
 
     void push_stack();
     void pop_stack();
     void prologue();
+    int64_t getlabel();
 public:
     CodeWriter(std::string asm_file_path);
     void writeArithmetic(std::string command);
