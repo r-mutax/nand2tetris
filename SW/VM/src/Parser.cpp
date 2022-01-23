@@ -151,7 +151,7 @@ void Parser::analyzeCommandType(){
         || (m_command == "lt")
         || (m_command == "and")
         || (m_command == "or")
-        || (m_command == "Not")
+        || (m_command == "not")
     ){
         m_command_type = C_ARITHEMIC;
     } else if(

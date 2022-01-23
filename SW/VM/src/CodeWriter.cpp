@@ -86,7 +86,16 @@ void CodeWriter::writeArithmetic(std::string command){
         m_ofs << "D=M\n";
         pop_stack();
         m_ofs << "D=D&M\n";
-
+        push_stack();
+    } else if(command == "or"){
+        pop_stack();
+        m_ofs << "D=M\n";
+        pop_stack();
+        m_ofs << "D=D|M\n";
+        push_stack();
+    } else if(command == "not"){
+        pop_stack();
+        m_ofs << "D=!D\n";
         push_stack();
     }
 }
