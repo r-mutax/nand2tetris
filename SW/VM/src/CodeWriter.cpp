@@ -81,6 +81,13 @@ void CodeWriter::writeArithmetic(std::string command){
         m_ofs << "(TRUE." << label << ")\n";
         m_ofs << "D=-1\n";
         push_stack();
+    } else if(command == "and"){
+        pop_stack();
+        m_ofs << "D=M\n";
+        pop_stack();
+        m_ofs << "D=D&M\n";
+
+        push_stack();
     }
 }
 
