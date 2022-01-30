@@ -54,6 +54,7 @@ private:
     void push_stack();
     void pop_stack();
     void prologue();
+    void set_this_pointer();
     int64_t getlabel();
 public:
     CodeWriter(std::string asm_file_path);

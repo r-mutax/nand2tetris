@@ -22,6 +22,7 @@ int main(int argc, char **argv)
                         codewriter.writePushPop(Parser::C_PUSH, parser.arg1(), parser.arg2());
                         break;
                     case Parser::C_POP:
+                        codewriter.writePushPop(Parser::C_POP, parser.arg1(), parser.arg2());
                         break;
                     case Parser::C_LABEL:
                         break;

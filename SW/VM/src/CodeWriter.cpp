@@ -109,10 +109,37 @@ void CodeWriter::writePushPop(Parser::COMMAND_TYPE command, std::string segment,
         } else if(segment == "constant"){
             m_ofs << "@" << index << "\n";
             m_ofs << "D=A\n";
+        } else if(segment == "local"){
+            m_ofs << "@LCL" << "\n";
+            m_ofs << "D=M\n";
+            m_ofs << "@" << index << "\n";
+            m_ofs << "A=D+A\n";
+            m_ofs << "D=M\n";
         }
         push_stack();
     } else if(command == Parser::C_POP){
+        if(segment == "argument"){
 
+        } else if(segment == "local"){
+            // calc local segment address
+            m_ofs << "@LCL" << "\n";
+            m_ofs << "D=M\n";
+            m_ofs << "@" << index << "\n";
+            m_ofs << "D=D+A\n";
+            m_ofs << "@R13\n";
+            m_ofs << "M=D\n";
+
+            // pop stack
+            pop_stack();
+            m_ofs << "D=M\n";
+
+            // restore local segment address
+            m_ofs << "@R13\n";
+            m_ofs << "A=M\n";
+
+            // pop to local segment
+            m_ofs << "M=D\n";
+        }
     }
 }
 
@@ -138,6 +165,12 @@ void CodeWriter::prologue(){
     m_ofs << "@256\n";
     m_ofs << "D=A\n";
     m_ofs << "@SP\n";
+    m_ofs << "M=D\n";
+
+    // initialize LCL
+    m_ofs << "@300\n";
+    m_ofs << "D=A\n";
+    m_ofs << "@LCL\n";
     m_ofs << "M=D\n";
 }
 
