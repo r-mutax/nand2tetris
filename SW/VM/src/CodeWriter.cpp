@@ -105,7 +105,11 @@ void CodeWriter::writePushPop(Parser::COMMAND_TYPE command, std::string segment,
     if(command == Parser::C_PUSH){
 
         if(segment == "argument"){
-
+            m_ofs << "@ARG" << "\n";
+            m_ofs << "D=M\n";
+            m_ofs << "@" << index << "\n";
+            m_ofs << "A=D+A\n";
+            m_ofs << "D=M\n";
         } else if(segment == "constant"){
             m_ofs << "@" << index << "\n";
             m_ofs << "D=A\n";
@@ -119,6 +123,24 @@ void CodeWriter::writePushPop(Parser::COMMAND_TYPE command, std::string segment,
         push_stack();
     } else if(command == Parser::C_POP){
         if(segment == "argument"){
+            // calc local segment address
+            m_ofs << "@ARG" << "\n";
+            m_ofs << "D=M\n";
+            m_ofs << "@" << index << "\n";
+            m_ofs << "D=D+A\n";
+            m_ofs << "@R13\n";
+            m_ofs << "M=D\n";
+
+            // pop stack
+            pop_stack();
+            m_ofs << "D=M\n";
+
+            // restore local segment address
+            m_ofs << "@R13\n";
+            m_ofs << "A=M\n";
+
+            // pop to local segment
+            m_ofs << "M=D\n";
 
         } else if(segment == "local"){
             // calc local segment address
@@ -172,6 +194,13 @@ void CodeWriter::prologue(){
     m_ofs << "D=A\n";
     m_ofs << "@LCL\n";
     m_ofs << "M=D\n";
+
+    // initialize ARG
+    m_ofs << "@400\n";
+    m_ofs << "D=A\n";
+    m_ofs << "@ARG\n";
+    m_ofs << "M=D\n";
+
 }
 
 int64_t CodeWriter::getlabel()
