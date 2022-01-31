@@ -56,6 +56,8 @@ private:
     void prologue();
     void set_this_pointer();
     int64_t getlabel();
+    void genPushSegment(std::string segment, std::string index);
+    void genPopSegment(std::string segment, std::string index);
 public:
     CodeWriter(std::string asm_file_path);
     void writeArithmetic(std::string command);
