@@ -6,6 +6,7 @@
 #include <fstream>
 #include <string>
 #include <stdexcept>
+#include <sstream>
 
 class Parser {
 public:
@@ -58,6 +59,8 @@ private:
     int64_t getlabel();
     void genPushSegment(std::string segment, std::string index);
     void genPopSegment(std::string segment, std::string index);
+    void genPushTemp(int32_t address);
+    void genPopTemp(int32_t address);
 public:
     CodeWriter(std::string asm_file_path);
     void writeArithmetic(std::string command);

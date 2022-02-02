@@ -115,6 +115,9 @@ void CodeWriter::writePushPop(Parser::COMMAND_TYPE command, std::string segment,
             genPushSegment("THIS", index);
         } else if(segment == "that"){
             genPushSegment("THAT", index);
+        } else if(segment == "temp"){
+            int index_i = std::stol(index);
+            genPushTemp(index_i + 5);
         }
         push_stack();
     } else if(command == Parser::C_POP){
@@ -126,6 +129,9 @@ void CodeWriter::writePushPop(Parser::COMMAND_TYPE command, std::string segment,
             genPopSegment("THIS", index);
         } else if(segment == "that"){
             genPopSegment("THAT", index);
+        } else if(segment == "temp"){
+            int index_i = std::stol(index);
+            genPopTemp(index_i + 5);
         }
     }
 }
@@ -216,3 +222,27 @@ void CodeWriter::genPopSegment(std::string segment, std::string index)
     m_ofs << "M=D\n";
 }
 
+void CodeWriter::genPushTemp(int32_t address)
+{
+    m_ofs << "@" << address << "\n";
+    m_ofs << "D=M\n";
+}
+
+void CodeWriter::genPopTemp(int32_t address)
+{
+    m_ofs << "@" << address << "\n";
+    m_ofs << "D=A\n";
+    m_ofs << "@R13\n";
+    m_ofs << "M=D\n";
+
+    // pop stack
+    pop_stack();
+    m_ofs << "D=M\n";
+
+    // restore local segment address
+    m_ofs << "@R13\n";
+    m_ofs << "A=M\n";
+
+    // pop to local segment
+    m_ofs << "M=D\n";
+}
