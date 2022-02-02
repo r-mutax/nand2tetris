@@ -6,7 +6,6 @@
 #include <fstream>
 #include <string>
 #include <stdexcept>
-#include <sstream>
 
 class Parser {
 public:
