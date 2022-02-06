@@ -2,6 +2,8 @@
 *.hack
 07/StackArithmetic/SimpleAdd/*.asm
 07/StackArithmetic/StackTest/*.asm
+07/MemoryAccess/BasicTest/*.asm
+07/MemoryAccess/PointerTest/*.asm
 SW/assembler/bin/*
 SW/assembler/load/*
 SW/VM/bin/*
