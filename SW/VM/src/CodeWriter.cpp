@@ -118,6 +118,9 @@ void CodeWriter::writePushPop(Parser::COMMAND_TYPE command, std::string segment,
         } else if(segment == "temp"){
             int index_i = std::stol(index);
             genPushTemp(index_i + 5);
+        } else if(segment == "pointer"){
+            int index_i = std::stol(index);
+            genPushPointer(index_i);
         }
         push_stack();
     } else if(command == Parser::C_POP){
@@ -132,6 +135,9 @@ void CodeWriter::writePushPop(Parser::COMMAND_TYPE command, std::string segment,
         } else if(segment == "temp"){
             int index_i = std::stol(index);
             genPopTemp(index_i + 5);
+        } else if(segment == "pointer"){
+            int index_i = std::stol(index);
+            genPopPointer(index_i);
         }
     }
 }
@@ -244,5 +250,31 @@ void CodeWriter::genPopTemp(int32_t address)
     m_ofs << "A=M\n";
 
     // pop to local segment
+    m_ofs << "M=D\n";
+}
+
+
+void CodeWriter::genPushPointer(int32_t index)
+{
+    // this
+    if(index == 0) {
+        m_ofs << "@THIS\n";
+    } else if(index == 1){
+        m_ofs << "@THAT\n";
+    }
+    m_ofs << "D=M\n";
+}
+
+void CodeWriter::genPopPointer(int32_t index)
+{
+    pop_stack();
+    m_ofs << "D=M\n";
+
+    if(index == 0){
+        m_ofs << "@THIS\n";
+    } else if(index == 1){
+        m_ofs << "@THAT\n";
+    }
+    
     m_ofs << "M=D\n";
 }

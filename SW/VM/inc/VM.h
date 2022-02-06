@@ -60,6 +60,8 @@ private:
     void genPopSegment(std::string segment, std::string index);
     void genPushTemp(int32_t address);
     void genPopTemp(int32_t address);
+    void genPushPointer(int32_t index);
+    void genPopPointer(int32_t index);
 public:
     CodeWriter(std::string asm_file_path);
     void writeArithmetic(std::string command);
