@@ -63,9 +63,10 @@ private:
     void genPushPointer(int32_t index);
     void genPopPointer(int32_t index);
 public:
-    CodeWriter(std::string asm_file_path);
+    CodeWriter(void);
     void writeArithmetic(std::string command);
     void writePushPop(Parser::COMMAND_TYPE command, std::string segment, std::string index);
+    void setFileName(std::string filename);
 };
 
 #endif

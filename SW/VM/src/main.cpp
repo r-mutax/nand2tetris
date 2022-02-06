@@ -1,5 +1,7 @@
 #include "VM.h"
 
+CodeWriter codewriter;
+
 bool is_vm(std::string path)
 {
     int64_t pos = path.rfind(".");
@@ -30,8 +32,7 @@ void CodeGenMain(std::string vm_path)
         }
 
         Parser  parser(vm_path);
-        CodeWriter codewriter(change_extension(vm_path, ".asm"));
-//        CodeWriter codewriter((vm_path + std::string(".asm")));
+        codewriter.setFileName(change_extension(vm_path, ".asm"));
 
         while(parser.hasMoreCommands())
         {

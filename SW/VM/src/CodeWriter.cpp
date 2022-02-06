@@ -1,9 +1,16 @@
 #include "VM.h"
 
-CodeWriter::CodeWriter(std::string asm_file_path){
+CodeWriter::CodeWriter(void)
+{
+}
+
+void CodeWriter::setFileName(std::string asm_file_path)
+{
+    if(m_ofs.is_open()){
+        m_ofs.close();
+    }
 
     m_ofs.open(asm_file_path);
-
     prologue();
 }
 
