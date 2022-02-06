@@ -11,6 +11,16 @@ bool is_vm(std::string path)
     return ext == std::string("vm");
 }
 
+std::string change_extension(std::string path,std::string ext)
+{
+    int64_t pos = path.rfind(".");
+    if(pos == std::string::npos){
+        return "";
+    }
+
+    return path.substr(0, pos) + ext;
+}
+
 void CodeGenMain(std::string vm_path)
 {
     try {
@@ -20,7 +30,8 @@ void CodeGenMain(std::string vm_path)
         }
 
         Parser  parser(vm_path);
-        CodeWriter codewriter((vm_path + std::string(".asm")));
+        CodeWriter codewriter(change_extension(vm_path, ".asm"));
+//        CodeWriter codewriter((vm_path + std::string(".asm")));
 
         while(parser.hasMoreCommands())
         {
