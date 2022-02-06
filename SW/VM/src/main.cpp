@@ -1,15 +1,21 @@
 #include "VM.h"
 
-int main(int argc, char **argv)
+bool is_vm(std::string path)
 {
-    if(argc != 2)
-    {
-        std::cerr << "[error] invalid arguments num.\n";
-    }
+    std::string ext = path.substr(path.length() - 3);
+    return ext == std::string(".vm");
+}
 
+void CodeGenMain(std::string vm_path)
+{
     try {
-        Parser  parser(argv[1]);
-        CodeWriter codewriter((argv[1] + std::string(".asm")));
+        if(!is_vm(vm_path))
+        {
+            return;
+        }
+
+        Parser  parser(vm_path);
+        CodeWriter codewriter((vm_path + std::string(".asm")));
 
         while(parser.hasMoreCommands())
         {
@@ -48,6 +54,31 @@ int main(int argc, char **argv)
     } catch (std::exception &e){
 
     }
+}
+
+int main(int argc, char **argv)
+{
+    if(argc != 2)
+    {
+        std::cerr << "[error] invalid arguments num.\n";
+    }
+
+    if(std::filesystem::is_directory(argv[1]))
+    {
+        std::filesystem::directory_iterator iter(argv[1]), end;
+        std::error_code err;
+        for(; iter != end && !err; iter.increment(err))
+        {
+            const std::filesystem::directory_entry entry = *iter;
+            CodeGenMain(entry.path().string());
+        }
+    }
+    else
+    {
+        CodeGenMain(argv[1]);
+    }
+
+
 
     return 0;
 }
