@@ -2,8 +2,13 @@
 
 bool is_vm(std::string path)
 {
-    std::string ext = path.substr(path.length() - 3);
-    return ext == std::string(".vm");
+    int64_t pos = path.rfind(".");
+    if(pos == std::string::npos){
+        return false;
+    }
+
+    std::string ext = path.substr(pos + 1);
+    return ext == std::string("vm");
 }
 
 void CodeGenMain(std::string vm_path)
@@ -77,8 +82,6 @@ int main(int argc, char **argv)
     {
         CodeGenMain(argv[1]);
     }
-
-
 
     return 0;
 }
