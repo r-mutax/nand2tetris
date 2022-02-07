@@ -6,11 +6,17 @@ CodeWriter::CodeWriter(void)
 
 void CodeWriter::setFileName(std::string asm_file_path)
 {
+    // asm file open
     if(m_ofs.is_open()){
         m_ofs.close();
     }
-
     m_ofs.open(asm_file_path);
+
+    // get funcname
+    int64_t pos_esc = asm_file_path.rfind('/');
+    int64_t pos_dot = asm_file_path.rfind('.');
+    m_funcname = asm_file_path.substr(pos_esc + 1, pos_dot - pos_esc - 1);
+
     prologue();
 }
 
@@ -34,7 +40,7 @@ void CodeWriter::writeArithmetic(std::string command){
         m_ofs << "D=-D\n";
         push_stack();
     } else if(command == "eq"){
-        int64_t label = getlabel();
+        std::string label = getlabel();
 
         pop_stack();
         m_ofs << "D=M\n";
@@ -53,7 +59,7 @@ void CodeWriter::writeArithmetic(std::string command){
         m_ofs << "D=-1\n";
         push_stack();
     } else if(command == "gt"){
-        int64_t label = getlabel();
+        std::string label = getlabel();
 
         pop_stack();
         m_ofs << "D=M\n";
@@ -71,7 +77,7 @@ void CodeWriter::writeArithmetic(std::string command){
         m_ofs << "D=-1\n";
         push_stack();
     } else if(command == "lt"){
-        int64_t label = getlabel();
+        std::string label = getlabel();
 
         pop_stack();
         m_ofs << "D=M\n";
@@ -199,9 +205,9 @@ void CodeWriter::prologue(){
 
 }
 
-int64_t CodeWriter::getlabel()
+std::string CodeWriter::getlabel()
 {
-    return m_label++;
+    return m_filename + std::string(".") + std::to_string(m_label++);
 }
 
 void CodeWriter::genPushSegment(std::string segment, std::string index)

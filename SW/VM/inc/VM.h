@@ -55,7 +55,7 @@ private:
     void pop_stack();
     void prologue();
     void set_this_pointer();
-    int64_t getlabel();
+    std::string getlabel();
     void genPushSegment(std::string segment, std::string index);
     void genPopSegment(std::string segment, std::string index);
     void genPushTemp(int32_t address);
