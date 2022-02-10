@@ -134,6 +134,9 @@ void CodeWriter::writePushPop(Parser::COMMAND_TYPE command, std::string segment,
         } else if(segment == "pointer"){
             int index_i = std::stol(index);
             genPushPointer(index_i);
+        } else if(segment == "static"){
+            m_ofs << "@" << getlabel() << "." << index << "\n";
+            m_ofs << "D=M\n";
         }
         push_stack();
     } else if(command == Parser::C_POP){
@@ -151,6 +154,11 @@ void CodeWriter::writePushPop(Parser::COMMAND_TYPE command, std::string segment,
         } else if(segment == "pointer"){
             int index_i = std::stol(index);
             genPopPointer(index_i);
+        } else if(segment == "static"){
+            pop_stack();
+            m_ofs << "D=M\n";
+            m_ofs << "@" << getlabel() << "." << index << "\n";
+            m_ofs << "M=D\n";
         }
     }
 }
@@ -207,7 +215,7 @@ void CodeWriter::prologue(){
 
 std::string CodeWriter::getlabel()
 {
-    return m_filename + std::string(".") + std::to_string(m_label++);
+    return m_funcname;
 }
 
 void CodeWriter::genPushSegment(std::string segment, std::string index)
