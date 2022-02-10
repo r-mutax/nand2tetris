@@ -4,6 +4,7 @@
 07/StackArithmetic/StackTest/*.asm
 07/MemoryAccess/BasicTest/*.asm
 07/MemoryAccess/PointerTest/*.asm
+07/MemoryAccess/StaticTest/*.asm
 SW/assembler/bin/*
 SW/assembler/load/*
 SW/VM/bin/*
