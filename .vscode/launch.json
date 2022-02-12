@@ -9,7 +9,7 @@
             "type": "cppdbg",
             "request": "launch",
             "program": "${command:extension.vscode-wsl-workspaceFolder}/SW/VM/bin/vm",
-            "args": ["../../07/MemoryAccess/PointerTest/PointerTest.vm"],
+            "args": ["../../07/MemoryAccess/StaticTest"],
             "stopAtEntry": true,
             "cwd": "${command:extension.vscode-wsl-workspaceFolder}/SW/VM",
             "environment": [],

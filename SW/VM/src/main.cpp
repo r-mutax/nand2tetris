@@ -32,7 +32,6 @@ void CodeGenMain(std::string vm_path)
         }
 
         Parser  parser(vm_path);
-        codewriter.setFileName(change_extension(vm_path, ".asm"));
 
         while(parser.hasMoreCommands())
         {
@@ -84,6 +83,8 @@ int main(int argc, char **argv)
     {
         std::filesystem::directory_iterator iter(argv[1]), end;
         std::error_code err;
+
+        codewriter.setFileName(argv[1] + std::string(".asm"));
         for(; iter != end && !err; iter.increment(err))
         {
             const std::filesystem::directory_entry entry = *iter;
@@ -92,6 +93,7 @@ int main(int argc, char **argv)
     }
     else
     {
+        codewriter.setFileName(change_extension(argv[1], ".asm"));
         CodeGenMain(argv[1]);
     }
 
