@@ -5,6 +5,7 @@
 07/MemoryAccess/BasicTest/*.asm
 07/MemoryAccess/PointerTest/*.asm
 07/MemoryAccess/StaticTest/*.asm
+08/ProgramFlow/BasicLoop/*.asm
 SW/assembler/bin/*
 SW/assembler/load/*
 SW/VM/bin/*
