@@ -47,10 +47,12 @@ void CodeGenMain(std::string vm_path)
                         codewriter.writePushPop(Parser::C_POP, parser.arg1(), parser.arg2());
                         break;
                     case Parser::C_LABEL:
+                        codewriter.writeLabel(parser.arg1());
                         break;
                     case Parser::C_GOTO:
                         break;
                     case Parser::C_IF:
+                        codewriter.writeIf(parser.arg1());
                         break;
                     case Parser::C_FUNCTION:
                         break;

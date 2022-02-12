@@ -154,13 +154,15 @@ void Parser::analyzeCommandType(){
         || (m_command == "not")
     ){
         m_command_type = C_ARITHEMIC;
-    } else if(
-        (m_command == "push")
-    ){
+    } else if(m_command == "push"){
         m_command_type = C_PUSH;
-    } else if(
-        (m_command == "pop")
-    ){
+    } else if(m_command == "pop"){
         m_command_type = C_POP;
+    } else if(m_command == "label"){
+        m_command_type = C_LABEL;
+    } else if(m_command == "goto"){
+        m_command_type = C_GOTO;
+    } else if(m_command == "if-goto"){
+        m_command_type = C_IF;
     }
 }

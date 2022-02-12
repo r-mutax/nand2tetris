@@ -66,6 +66,8 @@ public:
     CodeWriter(void);
     void writeArithmetic(std::string command);
     void writePushPop(Parser::COMMAND_TYPE command, std::string segment, std::string index);
+    void writeLabel(std::string label);
+    void writeIf(std::string label);
     void setFileName(std::string filename);
 };
 

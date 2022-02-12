@@ -163,6 +163,20 @@ void CodeWriter::writePushPop(Parser::COMMAND_TYPE command, std::string segment,
     }
 }
 
+void CodeWriter::writeLabel(std::string label)
+{
+    m_ofs << "(" << label << ")\n";
+}
+
+void CodeWriter::writeIf(std::string label)
+{
+    pop_stack();
+    m_ofs << "D=M\n";
+
+    m_ofs << "@" << label << "\n";
+    m_ofs << "D;JNE\n";
+}
+
 // push from DRegister to Stack top.
 void CodeWriter::push_stack(){
     m_ofs << "@SP\n";
