@@ -69,6 +69,8 @@ public:
     void writeLabel(std::string label);
     void writeIf(std::string label);
     void writeGoto(std::string label);
+    void writeFunction(std::string function, std::string argnum);
+    void writeReturn();
     void setFileName(std::string filename);
 };
 

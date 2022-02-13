@@ -163,5 +163,9 @@ void Parser::analyzeCommandType(){
         m_command_type = C_GOTO;
     } else if(m_command == "if-goto"){
         m_command_type = C_IF;
+    } else if(m_command == "function"){
+        m_command_type = C_FUNCTION;
+    } else if(m_command == "return"){
+        m_command_type = C_RETURN;
     }
 }

@@ -183,6 +183,79 @@ void CodeWriter::writeGoto(std::string label)
     m_ofs << "0;JEQ\n";
 }
 
+void CodeWriter::writeFunction(std::string function, std::string argnum)
+{
+    m_ofs << "(" << function << ")\n";
+    for(int i = 0; i < stol(argnum); i++)
+    {
+        writePushPop(Parser::C_PUSH, "constant", "0");
+    }
+}
+
+void CodeWriter::writeReturn()
+{
+    // get return address
+    m_ofs << "@LCL\n";
+    m_ofs << "D=M\n";
+    m_ofs << "@R13\n";
+    m_ofs << "M=D\n";
+    m_ofs << "@5\n";
+    m_ofs << "D=D-A\n";
+    m_ofs << "@R14\n";
+    m_ofs << "M=D\n";
+
+    // set retval
+    pop_stack();
+    m_ofs << "D=M\n";
+    m_ofs << "@ARG\n";
+    m_ofs << "A=M\n";
+    m_ofs << "M=D\n";
+
+    // set SP
+    m_ofs << "@ARG\n";
+    m_ofs << "D=M+1\n";
+    m_ofs << "@SP\n";
+    m_ofs << "M=D\n";
+
+    // set THAT
+    m_ofs << "@R13\n";
+    m_ofs << "M=M-1\n";
+    m_ofs << "A=M\n";
+    m_ofs << "D=M\n";
+    m_ofs << "@THAT\n";
+    m_ofs << "M=D\n";
+
+    // set THIS
+    m_ofs << "@R13\n";
+    m_ofs << "M=M-1\n";
+    m_ofs << "A=M\n";
+    m_ofs << "D=M\n";
+    m_ofs << "@THIS\n";
+    m_ofs << "M=D\n";
+
+    // set arg
+    m_ofs << "@R13\n";
+    m_ofs << "M=M-1\n";
+    m_ofs << "A=M\n";
+    m_ofs << "D=M\n";
+    m_ofs << "@ARG\n";
+    m_ofs << "M=D\n";
+
+    // set LCL
+    m_ofs << "@R13\n";
+    m_ofs << "M=M-1\n";
+    m_ofs << "A=M\n";
+    m_ofs << "D=M\n";
+    m_ofs << "@LCL\n";
+    m_ofs << "M=D\n";
+
+    // return
+    m_ofs << "@R14\n";
+    m_ofs << "A=M\n";
+    m_ofs << "0;JEQ\n";
+
+}
+
 // push from DRegister to Stack top.
 void CodeWriter::push_stack(){
     m_ofs << "@SP\n";
@@ -201,35 +274,35 @@ void CodeWriter::pop_stack(){
 
 void CodeWriter::prologue(){
 
-    // initialize SP
-    m_ofs << "@256\n";
-    m_ofs << "D=A\n";
-    m_ofs << "@SP\n";
-    m_ofs << "M=D\n";
+    // // initialize SP
+    // m_ofs << "@256\n";
+    // m_ofs << "D=A\n";
+    // m_ofs << "@SP\n";
+    // m_ofs << "M=D\n";
 
-    // initialize LCL
-    m_ofs << "@300\n";
-    m_ofs << "D=A\n";
-    m_ofs << "@LCL\n";
-    m_ofs << "M=D\n";
+    // // initialize LCL
+    // m_ofs << "@300\n";
+    // m_ofs << "D=A\n";
+    // m_ofs << "@LCL\n";
+    // m_ofs << "M=D\n";
 
-    // initialize ARG
-    m_ofs << "@400\n";
-    m_ofs << "D=A\n";
-    m_ofs << "@ARG\n";
-    m_ofs << "M=D\n";
+    // // initialize ARG
+    // m_ofs << "@400\n";
+    // m_ofs << "D=A\n";
+    // m_ofs << "@ARG\n";
+    // m_ofs << "M=D\n";
 
-    // initialize THIS
-    m_ofs << "@3000\n";
-    m_ofs << "D=A\n";
-    m_ofs << "@THIS\n";
-    m_ofs << "M=D\n";
+    // // initialize THIS
+    // m_ofs << "@3000\n";
+    // m_ofs << "D=A\n";
+    // m_ofs << "@THIS\n";
+    // m_ofs << "M=D\n";
 
-    // initialize THAT
-    m_ofs << "@3010\n";
-    m_ofs << "D=A\n";
-    m_ofs << "@THAT\n";
-    m_ofs << "M=D\n";
+    // // initialize THAT
+    // m_ofs << "@3010\n";
+    // m_ofs << "D=A\n";
+    // m_ofs << "@THAT\n";
+    // m_ofs << "M=D\n";
 
 }
 
