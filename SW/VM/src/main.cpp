@@ -23,6 +23,16 @@ std::string change_extension(std::string path,std::string ext)
     return path.substr(0, pos) + ext;
 }
 
+std::string get_directory_name(std::string path)
+{
+    int64_t pos = path.rfind("/");
+    if(pos == std::string::npos)
+    {
+        return "";
+    }
+
+    return path.substr(pos + 1);
+}
 void CodeGenMain(std::string vm_path)
 {
     try {
@@ -87,7 +97,7 @@ int main(int argc, char **argv)
         std::filesystem::directory_iterator iter(argv[1]), end;
         std::error_code err;
 
-        codewriter.setFileName(argv[1] + std::string(".asm"));
+        codewriter.setFileName(argv[1] + std::string("/") + get_directory_name(argv[1]) + std::string(".asm"));
         for(; iter != end && !err; iter.increment(err))
         {
             const std::filesystem::directory_entry entry = *iter;

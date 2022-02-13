@@ -126,7 +126,6 @@ void Parser::analyzeCommand(){
     if(buf.size() > 1){
         m_arg1 = buf[1];
     } else {
-
         m_arg1 = "";
     }
 
