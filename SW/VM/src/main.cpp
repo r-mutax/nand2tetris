@@ -50,6 +50,7 @@ void CodeGenMain(std::string vm_path)
                         codewriter.writeLabel(parser.arg1());
                         break;
                     case Parser::C_GOTO:
+                        codewriter.writeGoto(parser.arg1());
                         break;
                     case Parser::C_IF:
                         codewriter.writeIf(parser.arg1());

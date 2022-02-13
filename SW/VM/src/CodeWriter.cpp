@@ -177,6 +177,12 @@ void CodeWriter::writeIf(std::string label)
     m_ofs << "D;JNE\n";
 }
 
+void CodeWriter::writeGoto(std::string label)
+{
+    m_ofs << "@" << label << "\n";
+    m_ofs << "0;JEQ\n";
+}
+
 // push from DRegister to Stack top.
 void CodeWriter::push_stack(){
     m_ofs << "@SP\n";
