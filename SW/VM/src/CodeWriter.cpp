@@ -15,7 +15,6 @@ void CodeWriter::setFileName(std::string asm_file_path)
     // get funcname
     int64_t pos_esc = asm_file_path.rfind('/');
     int64_t pos_dot = asm_file_path.rfind('.');
-    m_funcname = asm_file_path.substr(pos_esc + 1, pos_dot - pos_esc - 1);
 
     prologue();
 }
@@ -185,6 +184,9 @@ void CodeWriter::writeGoto(std::string label)
 
 void CodeWriter::writeFunction(std::string function, std::string argnum)
 {
+    m_label = 0;
+    m_funcname = function;
+
     m_ofs << "(" << function << ")\n";
     for(int i = 0; i < stol(argnum); i++)
     {
@@ -308,7 +310,7 @@ void CodeWriter::prologue(){
 
 std::string CodeWriter::getlabel()
 {
-    return m_funcname;
+    return m_funcname + std::to_string(m_label);
 }
 
 void CodeWriter::genPushSegment(std::string segment, std::string index)
