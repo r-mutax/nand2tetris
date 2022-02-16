@@ -51,11 +51,14 @@ void CodeWriter::writeArithmetic(std::string command){
 
         // false
         m_ofs << "D=0\n";
-        push_stack();
-        
+        m_ofs << "@EQ_END." << label << "\n";
+        m_ofs << "0;JMP\n";
+
         // true
         m_ofs << "(" << "TRUE." << label << ")\n";
         m_ofs << "D=-1\n";
+
+        m_ofs << "(EQ_END." << label << ")\n";
         push_stack();
     } else if(command == "gt"){
         std::string label = getlabel();
@@ -70,10 +73,14 @@ void CodeWriter::writeArithmetic(std::string command){
 
         // false
         m_ofs << "D=0\n";
+        m_ofs << "@GT_END." << label << "\n";
+        m_ofs << "0;JMP\n";
 
         // true
         m_ofs << "(TRUE." << label << ")\n";
         m_ofs << "D=-1\n";
+
+        m_ofs << "(GT_END." << label << ")\n";
         push_stack();
     } else if(command == "lt"){
         // if x < y then push true.
