@@ -167,5 +167,7 @@ void Parser::analyzeCommandType(){
         m_command_type = C_FUNCTION;
     } else if(m_command == "return"){
         m_command_type = C_RETURN;
+    } else if(m_command == "call"){
+        m_command_type = C_CALL;
     }
 }

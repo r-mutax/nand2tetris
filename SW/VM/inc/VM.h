@@ -71,6 +71,7 @@ public:
     void writeGoto(std::string label);
     void writeFunction(std::string function, std::string argnum);
     void writeReturn();
+    void writeFuncCall(std::string func, std::string cnt);
     void setFileName(std::string filename);
 };
 

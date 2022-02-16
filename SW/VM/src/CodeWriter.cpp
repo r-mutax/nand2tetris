@@ -76,22 +76,28 @@ void CodeWriter::writeArithmetic(std::string command){
         m_ofs << "D=-1\n";
         push_stack();
     } else if(command == "lt"){
+        // if x < y then push true.
         std::string label = getlabel();
 
         pop_stack();
-        m_ofs << "D=M\n";
+        m_ofs << "D=M\n";           // y
         pop_stack();
-        m_ofs << "D=M-D\n";
+        m_ofs << "D=M-D\n";         // x - y
 
         m_ofs << "@TRUE." << label << "\n";
         m_ofs << "D;JLT\n";
 
         // false
         m_ofs << "D=0\n";
+        m_ofs << "@LT_END." << label << "\n";
+        m_ofs << "0;JMP\n";
 
         // true
         m_ofs << "(TRUE." << label << ")\n";
         m_ofs << "D=-1\n";
+
+        m_ofs << "(LT_END." << label << ")\n";
+        // return push
         push_stack();
     } else if(command == "and"){
         pop_stack();
@@ -196,13 +202,17 @@ void CodeWriter::writeFunction(std::string function, std::string argnum)
 
 void CodeWriter::writeReturn()
 {
+    m_ofs << "// return" << m_funcname << "\n";
     // get return address
     m_ofs << "@LCL\n";
     m_ofs << "D=M\n";
     m_ofs << "@R13\n";
     m_ofs << "M=D\n";
     m_ofs << "@5\n";
+    // なんかへん？？？
     m_ofs << "D=D-A\n";
+    m_ofs << "A=D\n";
+    m_ofs << "D=M\n";
     m_ofs << "@R14\n";
     m_ofs << "M=D\n";
 
@@ -276,41 +286,19 @@ void CodeWriter::pop_stack(){
 
 void CodeWriter::prologue(){
 
-    // // initialize SP
-    // m_ofs << "@256\n";
-    // m_ofs << "D=A\n";
-    // m_ofs << "@SP\n";
-    // m_ofs << "M=D\n";
+    // set SP
+    m_ofs << "@256\n";
+    m_ofs << "D=A\n";
+    m_ofs << "@SP\n";
+    m_ofs << "M=D\n"; 
 
-    // // initialize LCL
-    // m_ofs << "@300\n";
-    // m_ofs << "D=A\n";
-    // m_ofs << "@LCL\n";
-    // m_ofs << "M=D\n";
-
-    // // initialize ARG
-    // m_ofs << "@400\n";
-    // m_ofs << "D=A\n";
-    // m_ofs << "@ARG\n";
-    // m_ofs << "M=D\n";
-
-    // // initialize THIS
-    // m_ofs << "@3000\n";
-    // m_ofs << "D=A\n";
-    // m_ofs << "@THIS\n";
-    // m_ofs << "M=D\n";
-
-    // // initialize THAT
-    // m_ofs << "@3010\n";
-    // m_ofs << "D=A\n";
-    // m_ofs << "@THAT\n";
-    // m_ofs << "M=D\n";
-
+    // call Sys.init
+    writeFuncCall("Sys.init", "0");
 }
 
 std::string CodeWriter::getlabel()
 {
-    return m_funcname + std::to_string(m_label);
+    return m_funcname + std::string(".") + std::to_string(m_label++);
 }
 
 void CodeWriter::genPushSegment(std::string segment, std::string index)
@@ -393,4 +381,49 @@ void CodeWriter::genPopPointer(int32_t index)
     }
     
     m_ofs << "M=D\n";
+}
+
+void CodeWriter::writeFuncCall(std::string func, std::string cnt)
+{
+    std::string return_label = "RETURN." + getlabel();
+
+    // setting for return
+    m_ofs << "@" << return_label << "\n";
+    m_ofs << "D=A\n";
+    push_stack();
+
+    m_ofs << "@LCL\n";
+    m_ofs << "D=M\n";
+    push_stack();
+
+    m_ofs << "@ARG\n";
+    m_ofs << "D=M\n";
+    push_stack();
+
+    m_ofs << "@THIS\n";
+    m_ofs << "D=M\n";
+    push_stack();
+
+    m_ofs << "@THAT\n";
+    m_ofs << "D=M\n";
+    push_stack();
+
+    // set ARG
+    m_ofs << "@SP\n";
+    m_ofs << "D=M\n";
+    m_ofs << "@5\n";
+    m_ofs << "D=D-A\n";
+    m_ofs << "@" << cnt << "\n";
+    m_ofs << "D=D-A\n";
+    m_ofs << "@ARG\n";
+    m_ofs << "M=D\n";
+
+    // change LCL
+    m_ofs << "@SP\n";
+    m_ofs << "D=M\n";
+    m_ofs << "@LCL\n";
+    m_ofs << "M=D\n";
+
+    writeGoto(func);
+    m_ofs << "(" << return_label << ")\n";
 }

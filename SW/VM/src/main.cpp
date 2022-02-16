@@ -72,6 +72,7 @@ void CodeGenMain(std::string vm_path)
                         codewriter.writeReturn();
                         break;
                     case Parser::C_CALL:
+                        codewriter.writeFuncCall(parser.arg1(), parser.arg2());
                         break;
                     default:
                         break;
