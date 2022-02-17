@@ -4,7 +4,7 @@ CodeWriter::CodeWriter(void)
 {
 }
 
-void CodeWriter::setFileName(std::string asm_file_path)
+void CodeWriter::setAsmFileName(std::string asm_file_path)
 {
     // asm file open
     if(m_ofs.is_open()){
@@ -12,11 +12,12 @@ void CodeWriter::setFileName(std::string asm_file_path)
     }
     m_ofs.open(asm_file_path);
 
-    // get funcname
-    int64_t pos_esc = asm_file_path.rfind('/');
-    int64_t pos_dot = asm_file_path.rfind('.');
-
     prologue();
+}
+
+void CodeWriter::setFileName(std::string filename)
+{
+    m_filename = filename;
 }
 
 void CodeWriter::writeArithmetic(std::string command){
@@ -147,7 +148,7 @@ void CodeWriter::writePushPop(Parser::COMMAND_TYPE command, std::string segment,
             int index_i = std::stol(index);
             genPushPointer(index_i);
         } else if(segment == "static"){
-            m_ofs << "@" << getlabel() << "." << index << "\n";
+            m_ofs << "@" << m_filename << "." << index << "\n";
             m_ofs << "D=M\n";
         }
         push_stack();
@@ -169,7 +170,7 @@ void CodeWriter::writePushPop(Parser::COMMAND_TYPE command, std::string segment,
         } else if(segment == "static"){
             pop_stack();
             m_ofs << "D=M\n";
-            m_ofs << "@" << getlabel() << "." << index << "\n";
+            m_ofs << "@" << m_filename << "." << index << "\n";
             m_ofs << "M=D\n";
         }
     }
@@ -198,7 +199,6 @@ void CodeWriter::writeGoto(std::string label)
 void CodeWriter::writeFunction(std::string function, std::string argnum)
 {
     m_label = 0;
-    m_funcname = function;
 
     m_ofs << "(" << function << ")\n";
     for(int i = 0; i < stol(argnum); i++)
@@ -209,7 +209,7 @@ void CodeWriter::writeFunction(std::string function, std::string argnum)
 
 void CodeWriter::writeReturn()
 {
-    m_ofs << "// return" << m_funcname << "\n";
+    //m_ofs << "// return" << m_funcname << "\n";
     // get return address
     m_ofs << "@LCL\n";
     m_ofs << "D=M\n";
@@ -305,7 +305,7 @@ void CodeWriter::prologue(){
 
 std::string CodeWriter::getlabel()
 {
-    return m_funcname + std::string(".") + std::to_string(m_label++);
+    return m_filename + std::string(".") + std::to_string(m_label++);
 }
 
 void CodeWriter::genPushSegment(std::string segment, std::string index)

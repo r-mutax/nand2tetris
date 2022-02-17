@@ -47,8 +47,8 @@ public:
 class CodeWriter{
 private:
     std::ofstream           m_ofs;
+    std::string             m_asm_filename;
     std::string             m_filename;
-    std::string             m_funcname;
     int64_t                 m_label;
 
     void push_stack();
@@ -72,6 +72,7 @@ public:
     void writeFunction(std::string function, std::string argnum);
     void writeReturn();
     void writeFuncCall(std::string func, std::string cnt);
+    void setAsmFileName(std::string asm_file_path);
     void setFileName(std::string filename);
 };
 

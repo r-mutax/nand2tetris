@@ -33,6 +33,15 @@ std::string get_directory_name(std::string path)
 
     return path.substr(pos + 1);
 }
+
+std::string get_filename_no_ext(std::string path)
+{
+    // get funcname
+    int64_t pos_esc = path.rfind('/');
+    int64_t pos_dot = path.rfind('.');
+
+    return path.substr(pos_esc + 1, pos_dot - pos_esc - 1);
+}
 void CodeGenMain(std::string vm_path)
 {
     try {
@@ -100,16 +109,18 @@ int main(int argc, char **argv)
         std::filesystem::directory_iterator iter(argv[1]), end;
         std::error_code err;
 
-        codewriter.setFileName(argv[1] + std::string("/") + get_directory_name(argv[1]) + std::string(".asm"));
+        codewriter.setAsmFileName(argv[1] + std::string("/") + get_directory_name(argv[1]) + std::string(".asm"));
         for(; iter != end && !err; iter.increment(err))
         {
             const std::filesystem::directory_entry entry = *iter;
+            codewriter.setFileName(get_filename_no_ext(entry.path().string()));
             CodeGenMain(entry.path().string());
         }
     }
     else
     {
-        codewriter.setFileName(change_extension(argv[1], ".asm"));
+        codewriter.setAsmFileName(change_extension(argv[1], ".asm"));
+        codewriter.setFileName(get_filename_no_ext(argv[1]));
         CodeGenMain(argv[1]);
     }
 
