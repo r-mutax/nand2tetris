@@ -199,6 +199,7 @@ void CodeWriter::writeGoto(std::string label)
 void CodeWriter::writeFunction(std::string function, std::string argnum)
 {
     m_label = 0;
+    m_funcname = function;
 
     m_ofs << "(" << function << ")\n";
     for(int i = 0; i < stol(argnum); i++)
@@ -392,7 +393,7 @@ void CodeWriter::genPopPointer(int32_t index)
 
 void CodeWriter::writeFuncCall(std::string func, std::string cnt)
 {
-    std::string return_label = "RETURN." + getlabel();
+    std::string return_label = "RETURN." + m_funcname + "." + getlabel();
 
     // setting for return
     m_ofs << "@" << return_label << "\n";

@@ -49,6 +49,7 @@ private:
     std::ofstream           m_ofs;
     std::string             m_asm_filename;
     std::string             m_filename;
+    std::string             m_funcname;
     int64_t                 m_label;
 
     void push_stack();
