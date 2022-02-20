@@ -10,3 +10,5 @@ SW/assembler/bin/*
 SW/assembler/load/*
 SW/VM/bin/*
 SW/VM/load/*
+SW/JackCompiler/bin/*
+SW/JackCompiler/load/*

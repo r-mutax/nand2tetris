@@ -22,7 +22,16 @@
             "options": {
                 "cwd": "${workspaceFolder}/SW/VM"
             }
+        },
+        {
+            "label": "build compiler",
+            "type": "shell",
+            "command": "make",
+            "problemMatcher": [],
+            "group": "build",
+            "options": {
+                "cwd": "${workspaceFolder}/SW/JackCompiler"
+            }
         }
-
     ]
 }
