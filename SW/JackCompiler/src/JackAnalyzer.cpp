@@ -16,6 +16,10 @@ JackAnalyzer::JackAnalyzer(const std::string path)
             switch (jt.tokenType())
             {
                 case JackTokenizer::KEYWORD:
+                    {
+                        std::string buf = jt.keyword();
+                        jt.printDataLine("keyword", buf);
+                    }
                     break;
                 case JackTokenizer::SYMBOL:
                     break;
@@ -28,6 +32,8 @@ JackAnalyzer::JackAnalyzer(const std::string path)
                 default:
                     break;
             }
+
+            jt.advance();
         }
 
         jt.printDataTail("token");
