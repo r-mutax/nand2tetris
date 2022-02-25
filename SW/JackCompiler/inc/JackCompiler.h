@@ -26,6 +26,7 @@ class JackTokenizer
         TK_TYPE tokenType(void);
         void advance(void);
         std::string keyword();
+        std::string symbol();
     private:
         typedef struct _Token
         {
@@ -52,6 +53,7 @@ class JackTokenizer
         bool hasToken = true;
         void tokenizeLine(std::string buf);
         bool isKeyWord(std::string buf, int32_t pos, std::string& str);
+        bool isSymbol(std::string buf, int32_t pos, std::string& str);
         void readTokens();
 };
 

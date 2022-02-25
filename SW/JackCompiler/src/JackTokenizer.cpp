@@ -105,6 +105,7 @@ void JackTokenizer::tokenizeLine(std::string buf)
         else if(buf.compare(idx, 2, "/*") == 0){
             isInComment = true;
             idx += 2;
+            continue;
         }
         else if(isKeyWord(buf, idx, tk.str))
         {
@@ -112,6 +113,15 @@ void JackTokenizer::tokenizeLine(std::string buf)
             tokens.push(tk);
             idx += tk.str.length();
             tk.reset();
+            continue;
+        }
+        else if(isSymbol(buf, idx, tk.str))
+        {
+            tk.type = SYMBOL;
+            tokens.push(tk);
+            idx += tk.str.length();
+            tk.reset();
+            continue;
         }
 
         idx++;
@@ -120,15 +130,56 @@ void JackTokenizer::tokenizeLine(std::string buf)
 
 bool JackTokenizer::isKeyWord(std::string buf, int32_t pos,std::string& str)
 {
-    bool retval = false;
-    if(buf.compare(pos, 5, "class") == 0){
-        str = "class";
-        retval = true;
+    auto check = [buf, pos, &str](std::string keyword){
+        if(buf.compare(pos, keyword.length(), keyword) == 0){
+            str = keyword;
+            return true;
+        } else {
+            return false;
+        }
+    };
+
+    if (check("class")) return true;
+    if (check("constructor")) return true;
+    if (check("function")) return true;
+    if (check("method")) return true;
+    if (check("field")) return true;
+    if (check("static")) return true;
+    if (check("var")) return true;
+    if (check("int")) return true;
+    if (check("char")) return true;
+    if (check("boolean")) return true;
+    if (check("void")) return true;
+    if (check("true")) return true;
+    if (check("false")) return true;
+    if (check("null")) return true;
+    if (check("this")) return true;
+    if (check("let")) return true;
+    if (check("do")) return true;
+    if (check("if")) return true;
+    if (check("else")) return true;
+    if (check("while")) return true;
+    if (check("return")) return true;
+    
+    return false;
+}
+
+bool JackTokenizer::isSymbol(std::string buf, int32_t pos, std::string& str)
+{
+    if(std::string("{}()[].,;+-*/&|<>=~").find(buf[pos]) != std::string::npos)
+    {
+        str = buf[pos];
+        return true;
     }
-    return retval;
+    return false;
 }
 
 std::string JackTokenizer::keyword()
+{
+    return tokens.front().str;
+}
+
+std::string JackTokenizer::symbol()
 {
     return tokens.front().str;
 }

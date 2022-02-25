@@ -16,13 +16,17 @@ JackAnalyzer::JackAnalyzer(const std::string path)
             switch (jt.tokenType())
             {
                 case JackTokenizer::KEYWORD:
-                    {
-                        std::string buf = jt.keyword();
-                        jt.printDataLine("keyword", buf);
-                    }
+                {
+                    std::string buf = jt.keyword();
+                    jt.printDataLine("keyword", buf);
                     break;
+                }
                 case JackTokenizer::SYMBOL:
+                {
+                    std::string buf = jt.symbol();
+                    jt.printDataLine("symbol", buf);
                     break;
+                }
                 case JackTokenizer::IDENTIFIER:
                     break;
                 case JackTokenizer::INT_CONST:
