@@ -28,9 +28,15 @@ JackAnalyzer::JackAnalyzer(const std::string path)
                     break;
                 }
                 case JackTokenizer::IDENTIFIER:
+                {
                     break;
+                }
                 case JackTokenizer::INT_CONST:
+                {
+                    int32_t buf = jt.intVal();
+                    jt.printDataLine("integerConstant", std::to_string(buf));
                     break;
+                }
                 case JackTokenizer::STRING_CONST:
                     break;                
                 default:

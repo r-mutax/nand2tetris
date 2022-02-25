@@ -27,12 +27,13 @@ class JackTokenizer
         void advance(void);
         std::string keyword();
         std::string symbol();
+        int32_t intVal();
     private:
         typedef struct _Token
         {
             JackTokenizer::TK_TYPE      type;   // token type
             std::string                 str;    // string (ex. identifer, symbol, string_const)
-            long                        data;   // integer value(ex. int_const)
+            int32_t                     data;   // integer value(ex. int_const)
             void reset(){
                 type = JackTokenizer::TK_TYPE::NO_TYPE;
                 str = "";

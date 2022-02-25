@@ -98,16 +98,19 @@ void JackTokenizer::tokenizeLine(std::string buf)
             idx++;
             continue;
         }
-        else if(buf.compare(idx, 2, "//") == 0){
+
+        if(buf.compare(idx, 2, "//") == 0){
             // ignore the rest of this line.
             return;
         }
-        else if(buf.compare(idx, 2, "/*") == 0){
+
+        if(buf.compare(idx, 2, "/*") == 0){
             isInComment = true;
             idx += 2;
             continue;
         }
-        else if(isKeyWord(buf, idx, tk.str))
+
+        if(isKeyWord(buf, idx, tk.str))
         {
             tk.type = KEYWORD;
             tokens.push(tk);
@@ -115,11 +118,33 @@ void JackTokenizer::tokenizeLine(std::string buf)
             tk.reset();
             continue;
         }
-        else if(isSymbol(buf, idx, tk.str))
+
+        if(isSymbol(buf, idx, tk.str))
         {
             tk.type = SYMBOL;
             tokens.push(tk);
             idx += tk.str.length();
+            tk.reset();
+            continue;
+        }
+
+        if(isdigit(buf[idx]))
+        {
+            std::string digitbuf;
+            do {
+                if(isdigit(buf[idx])){
+                    digitbuf += buf[idx];
+                    idx++;
+                } else if(isalpha(buf[idx])){
+                    // [error]
+                    // identifier begin with number.
+                } else {
+                    break;
+                }
+            } while(1);
+            tk.type = INT_CONST;
+            tk.data = std::stol(digitbuf);
+            tokens.push(tk);
             tk.reset();
             continue;
         }
@@ -182,4 +207,9 @@ std::string JackTokenizer::keyword()
 std::string JackTokenizer::symbol()
 {
     return tokens.front().str;
+}
+
+int32_t JackTokenizer::intVal()
+{
+    return tokens.front().data;
 }
