@@ -33,6 +33,10 @@ void JackTokenizer::printDataTail(std::string node_name)
 // print xml node in one line.
 void JackTokenizer::printDataLine(std::string node_name, std::string value)
 {
+    value = std::regex_replace(value, std::regex("&"), "&amp;");
+    value = std::regex_replace(value, std::regex("<"), "&lt;");
+    value = std::regex_replace(value, std::regex(">"), "&gt;");
+
     for(int i = 0; i < lebel; i++)
     {
         m_ofs << "\t";

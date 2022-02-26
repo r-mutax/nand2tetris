@@ -2,6 +2,8 @@
 #include <filesystem>
 #include <fstream>
 #include <queue>
+#include <regex>
+
 
 // utility library
 std::string change_extension(std::string path,std::string ext);
