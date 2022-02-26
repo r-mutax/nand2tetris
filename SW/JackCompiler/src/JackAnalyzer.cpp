@@ -10,7 +10,7 @@ JackAnalyzer::JackAnalyzer(const std::string path)
     {
         JackTokenizer jt(path);
 
-        jt.printDataHead("token");
+        jt.printDataHead("tokens");
         while(jt.hasMoreTokens())
         {
             switch (jt.tokenType())
@@ -38,7 +38,10 @@ JackAnalyzer::JackAnalyzer(const std::string path)
                     break;
                 }
                 case JackTokenizer::STRING_CONST:
-                    break;                
+                {
+                    jt.printDataLine("stringConstant", jt.stringVal());
+                    break;
+                }
                 default:
                     break;
             }
@@ -46,6 +49,6 @@ JackAnalyzer::JackAnalyzer(const std::string path)
             jt.advance();
         }
 
-        jt.printDataTail("token");
+        jt.printDataTail("tokens");
     }
 }

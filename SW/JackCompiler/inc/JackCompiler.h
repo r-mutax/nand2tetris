@@ -28,6 +28,7 @@ class JackTokenizer
         std::string keyword();
         std::string symbol();
         int32_t intVal();
+        std::string stringVal();
     private:
         typedef struct _Token
         {

@@ -37,9 +37,9 @@ void JackTokenizer::printDataLine(std::string node_name, std::string value)
     {
         m_ofs << "\t";
     }
-    m_ofs << "<" << node_name << ">";
+    m_ofs << "<" << node_name << "> ";
     m_ofs << value;
-    m_ofs << "</" << node_name << ">" << std::endl;;
+    m_ofs << " </" << node_name << ">" << std::endl;;
 }
 
 bool JackTokenizer::hasMoreTokens()
@@ -149,6 +149,23 @@ void JackTokenizer::tokenizeLine(std::string buf)
             continue;
         }
 
+        if(buf[idx] == '"')
+        {
+            // string Constant
+            idx++;
+            while(buf[idx] != '"')
+            {
+                tk.str += buf[idx];
+                idx++;
+            }
+
+            tk.type = STRING_CONST;
+            tokens.push(tk);
+            tk.reset();
+            idx++;
+            return;
+        }
+
         idx++;
     }
 }
@@ -212,4 +229,9 @@ std::string JackTokenizer::symbol()
 int32_t JackTokenizer::intVal()
 {
     return tokens.front().data;
+}
+
+std::string JackTokenizer::stringVal()
+{
+    return tokens.front().str;
 }
