@@ -29,6 +29,7 @@ class JackTokenizer
         std::string symbol();
         int32_t intVal();
         std::string stringVal();
+        std::string identifier();
     private:
         typedef struct _Token
         {
@@ -57,6 +58,7 @@ class JackTokenizer
         bool isKeyWord(std::string buf, int32_t pos, std::string& str);
         bool isSymbol(std::string buf, int32_t pos, std::string& str);
         void readTokens();
+        bool isident1(char c);
 };
 
 // class CompilationEngine

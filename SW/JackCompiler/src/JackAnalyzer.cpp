@@ -29,6 +29,7 @@ JackAnalyzer::JackAnalyzer(const std::string path)
                 }
                 case JackTokenizer::IDENTIFIER:
                 {
+                    jt.printDataLine("identifier", jt.identifier());
                     break;
                 }
                 case JackTokenizer::INT_CONST:

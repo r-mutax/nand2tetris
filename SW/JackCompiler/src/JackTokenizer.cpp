@@ -163,7 +163,20 @@ void JackTokenizer::tokenizeLine(std::string buf)
             tokens.push(tk);
             tk.reset();
             idx++;
-            return;
+            continue;
+        }
+
+        if(isident1(buf[idx]))
+        {
+            do {
+                tk.str += buf[idx];
+                idx++;
+            } while(isident1(buf[idx]) || isdigit(buf[idx]));
+
+            tk.type = IDENTIFIER;
+            tokens.push(tk);
+            tk.reset();
+            continue;
         }
 
         idx++;
@@ -216,6 +229,11 @@ bool JackTokenizer::isSymbol(std::string buf, int32_t pos, std::string& str)
     return false;
 }
 
+bool JackTokenizer::isident1(char c)
+{
+    return ('a' <= c && c <= 'z') || ('A' <= c && c <= 'Z') || c == '_';
+}
+
 std::string JackTokenizer::keyword()
 {
     return tokens.front().str;
@@ -232,6 +250,11 @@ int32_t JackTokenizer::intVal()
 }
 
 std::string JackTokenizer::stringVal()
+{
+    return tokens.front().str;
+}
+
+std::string JackTokenizer::identifier()
 {
     return tokens.front().str;
 }
