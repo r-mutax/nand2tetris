@@ -85,4 +85,5 @@ class JackAnalyzer
     private:
     public:
         JackAnalyzer(const std::string path);
+        void genTokenToXML(const std::string path);
 };

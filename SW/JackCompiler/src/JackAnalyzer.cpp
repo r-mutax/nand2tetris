@@ -4,10 +4,26 @@ JackAnalyzer::JackAnalyzer(const std::string path)
 {
     if(std::filesystem::is_directory(path))
     {
-        
+        std::filesystem::directory_iterator iter(path), end;
+        std::error_code err;
+
+        for(; iter != end && !err; iter.increment(err))
+        {
+            const std::filesystem::directory_entry entry = *iter;
+
+            if(entry.path().extension() == ".jack"){
+                genTokenToXML(entry.path().string());
+            }
+        }
     }
     else
     {
+        genTokenToXML(path);
+    }
+}
+
+void JackAnalyzer::genTokenToXML(const std::string path)
+{
         JackTokenizer jt(path);
 
         jt.printDataHead("tokens");
@@ -51,5 +67,4 @@ JackAnalyzer::JackAnalyzer(const std::string path)
         }
 
         jt.printDataTail("tokens");
-    }
 }
