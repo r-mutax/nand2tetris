@@ -1,6 +1,15 @@
 #include "JackCompiler.h"
 
+JackTokenizer::JackTokenizer(void)
+{
+}
+
 JackTokenizer::JackTokenizer(const std::string path)
+{
+    Open(path);
+}
+
+void JackTokenizer::Open(const std::string path)
 {
     m_ifs.open(path);
 

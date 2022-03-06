@@ -1,5 +1,6 @@
 #pragma region
 
+#include <iostream>
 #include <string>
 #include <filesystem>
 #include <fstream>
@@ -40,6 +41,8 @@ class JackTokenizer
         void printDataLine(std::string node_name, std::string value) { m_xml.printDataLine(node_name, value); };
 
         JackTokenizer(const std::string path);
+        JackTokenizer(void);
+        void Open(const std::string path);
         bool hasMoreTokens(void);
         TK_TYPE tokenType(void);
         void advance(void);
@@ -79,27 +82,29 @@ class JackTokenizer
         bool isident1(char c);
 };
 
-// class CompilationEngine
-// {
-//     private:
-//         JackTokenizer*      jt;
-//         std::ofstream       m_ofs;
-//         int                 lebel;
-//         void compileClass();
-//         void compileClassVarDec();
+class CompilationEngine
+{
+    private:
+        JackTokenizer       jt;
+        GenXMLFile          m_xml;
 
+        void compileClass();
+        bool compileClassVarDec();
+        bool compileType();
+        bool compileVarName();
 
-
-//     public:
-//         CompilationEngine(const std::string path);
-//         ~CompilationEngine(void);
-//         void compile(void);
-// };
+    public:
+        CompilationEngine(const std::string path);
+        ~CompilationEngine(void);
+        void compile(void);
+};
 
 class JackAnalyzer
 {
     private:
+        
     public:
         JackAnalyzer(const std::string path);
         void genTokenToXML(const std::string path);
+        void runCompileJackFile(const std::string path);
 };

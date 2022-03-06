@@ -12,14 +12,21 @@ JackAnalyzer::JackAnalyzer(const std::string path)
             const std::filesystem::directory_entry entry = *iter;
 
             if(entry.path().extension() == ".jack"){
-                genTokenToXML(entry.path().string());
+                runCompileJackFile(entry.path().string());
+                // genTokenToXML(entry.path().string());
             }
         }
     }
     else
     {
-        genTokenToXML(path);
+        // genTokenToXML(path);
     }
+}
+
+void JackAnalyzer::runCompileJackFile(const std::string path)
+{
+    CompilationEngine ce(path);
+    ce.compile();
 }
 
 void JackAnalyzer::genTokenToXML(const std::string path)
