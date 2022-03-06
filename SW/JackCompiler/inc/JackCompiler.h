@@ -1,3 +1,5 @@
+#pragma region
+
 #include <string>
 #include <filesystem>
 #include <fstream>
@@ -8,6 +10,20 @@
 // utility library
 std::string change_extension(std::string path,std::string ext);
 
+class GenXMLFile 
+{
+    private:
+        std::ofstream   m_ofs;
+        int32_t lebel = 0;
+    public:
+        GenXMLFile(){};
+        ~GenXMLFile();
+        void openXMLFile(const std::string& path);
+        void printDataHead(std::string node_name);
+        void printDataTail(std::string node_name);
+        void printDataLine(std::string node_name, std::string value);
+};
+
 class JackTokenizer
 {
     public:
@@ -17,11 +33,11 @@ class JackTokenizer
             , IDENTIFIER
             , INT_CONST
             , STRING_CONST
-            , NO_TYPE
+            , NO_TYPE 
         };
-        void printDataHead(std::string node_name);
-        void printDataTail(std::string node_name);
-        void printDataLine(std::string node_name, std::string value);
+        void printDataHead(std::string node_name) { m_xml.printDataHead(node_name); };
+        void printDataTail(std::string node_name) { m_xml.printDataTail(node_name); };
+        void printDataLine(std::string node_name, std::string value) { m_xml.printDataLine(node_name, value); };
 
         JackTokenizer(const std::string path);
         bool hasMoreTokens(void);
@@ -51,7 +67,7 @@ class JackTokenizer
         } Token;
 
         std::ifstream   m_ifs;
-        std::ofstream   m_ofs;
+        GenXMLFile      m_xml;
         std::queue<Token>  tokens;
         int lebel = 0;
         bool isInComment = false;

@@ -3,47 +3,13 @@
 JackTokenizer::JackTokenizer(const std::string path)
 {
     m_ifs.open(path);
-    m_ofs.open(path + ".xml");
+
+    size_t  dot_pos = path.rfind(".");
+    std::string xml_path = path.substr(0, dot_pos);
+
+    m_xml.openXMLFile(xml_path + "T.xml");
 
     readTokens();
-}
-
-// print xml node head with lebel.
-void JackTokenizer::printDataHead(std::string node_name)
-{
-    for(int i = 0; i < lebel; i++)
-    {
-        m_ofs << "\t";
-    }
-
-    m_ofs << "<" << node_name << ">" << std::endl;
-}
-
-// print xml node tail with lebel.
-void JackTokenizer::printDataTail(std::string node_name)
-{
-    for(int i = 0; i < lebel; i++)
-    {
-        m_ofs << "\t";
-    }
-
-    m_ofs << "</" << node_name << ">" << std::endl;
-}
-
-// print xml node in one line.
-void JackTokenizer::printDataLine(std::string node_name, std::string value)
-{
-    value = std::regex_replace(value, std::regex("&"), "&amp;");
-    value = std::regex_replace(value, std::regex("<"), "&lt;");
-    value = std::regex_replace(value, std::regex(">"), "&gt;");
-
-    for(int i = 0; i < lebel; i++)
-    {
-        m_ofs << "\t";
-    }
-    m_ofs << "<" << node_name << "> ";
-    m_ofs << value;
-    m_ofs << " </" << node_name << ">" << std::endl;;
 }
 
 bool JackTokenizer::hasMoreTokens()
