@@ -47,6 +47,17 @@ void CompilationEngine::compileClass()
     // check classVarDec
     while (compileClassVarDec()){};
 
+    // check subroutineDec
+    while (compileSubroutine()) {};
+
+    // check "}"
+    if(jt.tokenType() == JackTokenizer::SYMBOL)
+    {
+        m_xml.printDataLine("symbol", jt.symbol());
+        jt.advance();
+    }
+
+    m_xml.printDataTail("class");
 }
 
 // ( 'static' | 'field' ) type varName ( ',' varName )* ';'
@@ -112,6 +123,7 @@ bool CompilationEngine::compileClassVarDec()
     return true;
 }
 
+// 'int' | 'char' | 'boolean' | className
 bool CompilationEngine::compileType()
 {
     if(jt.tokenType() == JackTokenizer::KEYWORD)
@@ -138,6 +150,7 @@ bool CompilationEngine::compileType()
     return false;
 }
 
+// identifier
 bool CompilationEngine::compileVarName()
 {
     if(jt.tokenType() == JackTokenizer::IDENTIFIER)
@@ -147,4 +160,88 @@ bool CompilationEngine::compileVarName()
         return true;
     }
     return false;
+}
+
+bool CompilationEngine::compileSubroutineName()
+{
+    if(jt.tokenType() == JackTokenizer::IDENTIFIER)
+    {
+        m_xml.printDataLine("identifier", jt.identifier());
+        jt.advance();
+        return true;
+    }
+    return false;
+}
+
+bool CompilationEngine::compileParameterList()
+{
+    m_xml.printDataHead("parameterList");
+    m_xml.printDataTail("parameterList");
+
+    return true;
+}
+
+// ('constructor' | 'function' | 'method')
+// ('void' | type) subroutineName '('
+//  parameterList ')'
+// subroutineBody
+bool CompilationEngine::compileSubroutine()
+{
+    // is SubroutineDec?
+    if (jt.tokenType() != JackTokenizer::KEYWORD
+        || ( jt.keyword() != "constructor"
+            && jt.keyword() != "function"
+            &&  jt.keyword() != "method")
+    ){
+        return false;
+    }
+
+    m_xml.printDataHead("subroutineDec");
+ 
+    // ('constructor' | 'function' | 'method')
+    m_xml.printDataLine("keyword", jt.keyword());
+    jt.advance();
+
+    // ('void' | type)
+    if(jt.tokenType() == JackTokenizer::KEYWORD && jt.keyword() == "void"){
+        m_xml.printDataLine("keyword", jt.keyword());
+        jt.advance();
+    } else {
+        compileType();
+    }
+
+    // subroutineName
+    compileSubroutineName();
+
+    // check "("
+    if(jt.tokenType() == JackTokenizer::SYMBOL)
+    {
+        m_xml.printDataLine("symbol", jt.symbol());
+        jt.advance();
+    }
+
+    // paramaterList
+    compileParameterList();
+
+    // check ")"
+    if(jt.tokenType() == JackTokenizer::SYMBOL)
+    {
+        m_xml.printDataLine("symbol", jt.symbol());
+        jt.advance();
+    }
+
+    compileSubroutineBody();
+
+    m_xml.printDataTail("subroutineDec");
+
+    return true;
+}
+
+// '{' varDec* statements '}'
+bool CompilationEngine::compileSubroutineBody()
+{
+    m_xml.printDataHead("subroutineBody");
+    m_xml.printDataTail("subroutineBody");
+
+    return true;
 }

@@ -92,6 +92,10 @@ class CompilationEngine
         bool compileClassVarDec();
         bool compileType();
         bool compileVarName();
+        bool compileSubroutine();
+        bool compileSubroutineName();
+        bool compileParameterList();
+        bool compileSubroutineBody();
 
     public:
         CompilationEngine(const std::string path);
