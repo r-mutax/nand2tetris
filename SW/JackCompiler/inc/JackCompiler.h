@@ -96,6 +96,7 @@ class CompilationEngine
         bool compileSubroutineName();
         bool compileParameterList();
         bool compileSubroutineBody();
+        bool compileVarDec();
 
     public:
         CompilationEngine(const std::string path);

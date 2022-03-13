@@ -263,7 +263,67 @@ bool CompilationEngine::compileSubroutine()
 bool CompilationEngine::compileSubroutineBody()
 {
     m_xml.printDataHead("subroutineBody");
+
+    // check "{"
+    if(jt.tokenType() == JackTokenizer::SYMBOL)
+    {
+        m_xml.printDataLine("symbol", jt.symbol());
+        jt.advance();
+    }
+
+    // check VarDec
+    while (compileVarDec()){};
+
+
+
+
+    // check "}"
+    if(jt.tokenType() == JackTokenizer::SYMBOL)
+    {
+        m_xml.printDataLine("symbol", jt.symbol());
+        jt.advance();
+    }
+
     m_xml.printDataTail("subroutineBody");
+
+    return true;
+}
+
+// 'var' type varName (',' varName) * ';'
+bool CompilationEngine::compileVarDec()
+{
+    if (jt.tokenType() != JackTokenizer::KEYWORD
+        || jt.keyword() != "var")
+    {
+        return false;
+    }
+
+    m_xml.printDataHead("varDec");
+
+    m_xml.printDataLine("keyword", jt.keyword());
+    jt.advance();
+
+    compileType();
+    while(1)
+    {
+        compileVarName();
+        if(jt.tokenType() != JackTokenizer::SYMBOL
+            || jt.symbol() != ",")
+        {
+            break;
+        }
+        else
+        {
+            m_xml.printDataLine("symbol", jt.symbol());
+            jt.advance();
+        }
+    }
+
+    // check ;
+    m_xml.printDataLine("symbol", jt.symbol());
+    jt.advance();
+
+    m_xml.printDataTail("varDec");
 
     return true;
 }
