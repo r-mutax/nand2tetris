@@ -176,6 +176,28 @@ bool CompilationEngine::compileSubroutineName()
 bool CompilationEngine::compileParameterList()
 {
     m_xml.printDataHead("parameterList");
+
+    if (jt.tokenType() != JackTokenizer::SYMBOL
+        || jt.symbol() != ")")
+    {
+        while(1)
+        {
+            compileType();
+            compileVarName();
+
+            if (jt.tokenType() != JackTokenizer::SYMBOL
+                || jt.symbol() != ",")
+            {
+                break;
+            }
+            else
+            {
+                m_xml.printDataLine("symbol", jt.symbol());
+                jt.advance();
+            }
+        }
+    }
+
     m_xml.printDataTail("parameterList");
 
     return true;
