@@ -3,8 +3,7 @@
 CompilationEngine::CompilationEngine(const std::string path)
 {
     jt.Open(path);
-
-    m_xml.openXMLFile(change_extension(path, "xml"));
+    output_program.SetFileName(change_extension(path, "xml"));
 }
 
 CompilationEngine::~CompilationEngine()
@@ -15,82 +14,87 @@ CompilationEngine::~CompilationEngine()
 // exec compile file.
 void CompilationEngine::compile(void)
 {
-    compileClass();
+    JC_Program* prog = new JC_Program();
+    prog->cls = compileClass();
+    output_program.printProgram(prog);
 }
 
 // 'class' className '{' classVarDec* subroutineDec* '}'
-void CompilationEngine::compileClass()
+JC_Class* CompilationEngine::compileClass()
 {
-    m_xml.printDataHead("class");
-
-    // check class
-    if(jt.tokenType() == JackTokenizer::KEYWORD)
-    {
-        m_xml.printDataLine("keyword", jt.keyword());
-        jt.advance();
+    if (jt.tokenType() != JackTokenizer::KEYWORD
+        || jt.keyword() != "class") {
+        return nullptr;
     }
+    jt.advance();
+    
+    JC_Class*   cls = new JC_Class();
 
     // check className
-    if(jt.tokenType() == JackTokenizer::IDENTIFIER)
-    {
-        m_xml.printDataLine("identifier", jt.identifier());
+    if(jt.tokenType() == JackTokenizer::IDENTIFIER){
+        cls->classname = jt.identifier();
         jt.advance();
     }
 
     // check "{"
-    if(jt.tokenType() == JackTokenizer::SYMBOL)
-    {
-        m_xml.printDataLine("symbol", jt.symbol());
+    if(jt.tokenType() == JackTokenizer::SYMBOL && jt.symbol() == "{"){
         jt.advance();
     }
 
     // check classVarDec
-    while (compileClassVarDec()){};
+    JC_ClassVarDec  cvd_head;
+    JC_ClassVarDec* cvd_cur = &cvd_head;
+    while(cvd_cur){
+        cvd_cur->next = compileClassVarDec();
+        cvd_cur = cvd_cur->next;
+    }
+    cls->classVarDecs = cvd_head.next;
 
-    // check subroutineDec
-    while (compileSubroutine()) {};
+    // // check subroutineDec
+    // while (compileSubroutine()) {};
 
     // check "}"
-    if(jt.tokenType() == JackTokenizer::SYMBOL)
-    {
-        m_xml.printDataLine("symbol", jt.symbol());
+    if(jt.tokenType() == JackTokenizer::SYMBOL && jt.symbol() == "}"){
         jt.advance();
     }
 
-    m_xml.printDataTail("class");
+    return cls;
 }
 
 // ( 'static' | 'field' ) type varName ( ',' varName )* ';'
-bool CompilationEngine::compileClassVarDec()
+JC_ClassVarDec* CompilationEngine::compileClassVarDec()
 {
     // is classVarDec?
     if(jt.tokenType() != JackTokenizer::KEYWORD
         || (jt.keyword() != "static" && jt.keyword() != "field")
     )
     {
-        return false;
+        return nullptr;
     }
 
-    m_xml.printDataHead("classVarDec");
+    JC_ClassVarDec* cvd = new JC_ClassVarDec();
 
     // (static || field)
-    m_xml.printDataLine("keyword", jt.keyword());
+    cvd->vartype = jt.keyword();
     jt.advance();
 
     // type
-    if( !compileType() )
+    cvd->type = compileType();
+    if( cvd->type == nullptr )
     {
         std::cerr << "This is not type." << std::endl;
         exit(1);
     }
 
     // varName
-    if( !compileVarName() )
+    cvd->VarName = compileVarName();
+    if( cvd->VarName == nullptr )
     {
-        std::cerr << "This is not varName." << std::endl;
+        std::cerr << "This is not varname." << std::endl;
         exit(1);
     }
 
+    JC_VarName* cur_varname = cvd->VarName;
     // (',' varName) *
     do {
         if(jt.tokenType() != JackTokenizer::SYMBOL
@@ -98,14 +102,16 @@ bool CompilationEngine::compileClassVarDec()
         ){
             break;
         }
-        m_xml.printDataLine("symbol", jt.symbol());
         jt.advance();
 
-        if ( !compileVarName() ){
+        cur_varname->next = compileVarName();
+        if(cur_varname->next == nullptr)
+        {
             std::cerr << "This is not varName." << std::endl;
             exit(1);
         }
-
+        cur_varname = cur_varname->next;
+    
     } while (1);
 
     if(jt.tokenType() != JackTokenizer::SYMBOL
@@ -115,51 +121,55 @@ bool CompilationEngine::compileClassVarDec()
         std::cerr << "Expect \";\" ." << std::endl;
         exit(1);
     }
-    m_xml.printDataLine("symbol", jt.symbol());
     jt.advance();
 
-    m_xml.printDataTail("classVarDec");
-
-    return true;
+    return cvd;
 }
 
 // 'int' | 'char' | 'boolean' | className
-bool CompilationEngine::compileType()
+JC_Type* CompilationEngine::compileType()
 {
     if(jt.tokenType() == JackTokenizer::KEYWORD)
     {
         if(jt.keyword() == "int"
             || jt.keyword() == "char"
-            || jt.keyword() == "boolean"
-        ){
-            m_xml.printDataLine("keyword", jt.keyword());
+            || jt.keyword() == "boolean")
+        {
+            JC_Type* ty = new JC_Type();
+            ty->is_keyword = true;
+            ty->type = jt.keyword();
             jt.advance();
-            return true;
-        }else{
-            return false;
+            return ty;
+        }
+        else
+        {
+            return nullptr;
         }
     }
-
-    if(jt.tokenType() == JackTokenizer::IDENTIFIER)
+    else if (jt.tokenType() == JackTokenizer::IDENTIFIER)
     {
-        m_xml.printDataLine("identifier", jt.identifier());
+        JC_Type* ty = new JC_Type();
+        ty->is_keyword = false;
+        ty->type = jt.identifier();
         jt.advance();
-        return true;
+        return ty;
     }
 
-    return false;
+    return nullptr;
 }
 
 // identifier
-bool CompilationEngine::compileVarName()
+JC_VarName* CompilationEngine::compileVarName()
 {
     if(jt.tokenType() == JackTokenizer::IDENTIFIER)
     {
-        m_xml.printDataLine("identifier", jt.identifier());
+        JC_VarName* varname = new JC_VarName();
+
+        varname->name = jt.identifier();
         jt.advance();
-        return true;
+        return varname;
     }
-    return false;
+    return nullptr;
 }
 
 bool CompilationEngine::compileSubroutineName()

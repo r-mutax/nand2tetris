@@ -7,6 +7,8 @@
 #include <queue>
 #include <regex>
 
+#include "node.h"
+
 
 // utility library
 std::string change_extension(std::string path,std::string ext);
@@ -82,16 +84,28 @@ class JackTokenizer
         bool isident1(char c);
 };
 
+class OutputProgram
+{
+        GenXMLFile  m_xml;
+        void printClass(JC_Class* cls);
+        void PrintClassVarDec(JC_ClassVarDec* cvd);
+    public:
+        OutputProgram(){};
+        void SetFileName(std::string path);
+        void printProgram(JC_Program*   program);
+};
+
 class CompilationEngine
 {
     private:
         JackTokenizer       jt;
         GenXMLFile          m_xml;
+        OutputProgram       output_program;
 
-        void compileClass();
-        bool compileClassVarDec();
-        bool compileType();
-        bool compileVarName();
+        JC_Class* compileClass();
+        JC_ClassVarDec* compileClassVarDec();
+        JC_Type* compileType();
+        JC_VarName* compileVarName();
         bool compileSubroutine();
         bool compileSubroutineName();
         bool compileParameterList();
