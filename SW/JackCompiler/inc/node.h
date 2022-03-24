@@ -8,7 +8,8 @@ enum JC_NodeType {
     JC_PROGRAM,
     JC_CLASS,
     JC_TYPE,
-    JC_VARNAME
+    JC_VARNAME,
+    JC_SUBROUTINENAME
 };
 
 class JC_Element
@@ -38,9 +39,48 @@ class JC_VarName : public JC_Element
         JC_VarName*     next;
 };
 
+class JC_SubroutineName : public JC_Element
+{
+    public:
+        JC_SubroutineName(){
+            type = JC_SUBROUTINENAME;
+        };
+        std::string name;
+};
+
+class JC_Parameter : JC_Element
+{
+    public:
+        JC_Parameter(){
+            type = nullptr;
+            varname = nullptr;
+            next = nullptr;
+        }
+        JC_Type*        type;
+        JC_VarName*     varname;
+        JC_Parameter*   next;
+};
+
+class JC_Subroutine : public JC_Element
+{
+    public:
+        std::string         subroutinetype;
+        JC_Type*            type;
+        JC_SubroutineName*  name;
+        JC_Parameter*       parameterlist;
+        JC_Subroutine*      next;
+        
+};
+
 class JC_ClassVarDec : public JC_Element
 {
     public:
+        JC_ClassVarDec()
+        {
+            next = nullptr;
+            type = nullptr;
+            VarName = nullptr;
+        };
         std::string         vartype;
         JC_ClassVarDec*     next;
         JC_Type*            type;
@@ -52,7 +92,7 @@ class JC_Class : public JC_Element
     public:
         std::string classname;
         JC_ClassVarDec* classVarDecs;
-        JC_Element* classSubroutinDecs;
+        JC_Subroutine* classSubroutinDecs;
 };
 
 class JC_Program : public JC_Element

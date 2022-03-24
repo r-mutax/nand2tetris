@@ -88,7 +88,9 @@ class OutputProgram
 {
         GenXMLFile  m_xml;
         void printClass(JC_Class* cls);
-        void PrintClassVarDec(JC_ClassVarDec* cvd);
+        void printClassVarDec(JC_ClassVarDec* cvd);
+        void printClassSubroutine(JC_Subroutine* csr);
+        void printParameterList(JC_Parameter* param);
     public:
         OutputProgram(){};
         void SetFileName(std::string path);
@@ -106,9 +108,9 @@ class CompilationEngine
         JC_ClassVarDec* compileClassVarDec();
         JC_Type* compileType();
         JC_VarName* compileVarName();
-        bool compileSubroutine();
-        bool compileSubroutineName();
-        bool compileParameterList();
+        JC_Subroutine* compileSubroutine();
+        JC_SubroutineName* compileSubroutineName();
+        JC_Parameter* compileParameterList();
         bool compileSubroutineBody();
         bool compileVarDec();
 

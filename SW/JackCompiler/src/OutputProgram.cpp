@@ -20,8 +20,14 @@ void OutputProgram::printClass(JC_Class* cls)
 
     JC_ClassVarDec* cur = cls->classVarDecs;
     while(cur){
-        PrintClassVarDec((JC_ClassVarDec*)cur);
+        printClassVarDec((JC_ClassVarDec*)cur);
         cur = cur->next;
+    }
+
+    JC_Subroutine* csr = cls->classSubroutinDecs;
+    while(csr){
+        printClassSubroutine(csr);
+        csr = csr->next;
     }
 
     m_xml.printDataLine("symbol", "}");
@@ -30,7 +36,7 @@ void OutputProgram::printClass(JC_Class* cls)
 }
 
 // ( 'static' | 'field' ) type varName ( ',' varName )* ';'
-void OutputProgram::PrintClassVarDec(JC_ClassVarDec* clsvardec)
+void OutputProgram::printClassVarDec(JC_ClassVarDec* clsvardec)
 {
     m_xml.printDataHead("classVarDec");
 
@@ -51,4 +57,68 @@ void OutputProgram::PrintClassVarDec(JC_ClassVarDec* clsvardec)
 
     m_xml.printDataLine("symbol", ";");
     m_xml.printDataTail("classVarDec");
+}
+
+// ('constructor' | 'function' | 'method')
+// ('void' | type) subroutineName '('
+//  parameterList ')'
+// subroutineBody
+void OutputProgram::printClassSubroutine(JC_Subroutine* csr)
+{
+    m_xml.printDataHead("subroutineDec");
+
+    // subroutine type
+    m_xml.printDataLine("keyword", csr->subroutinetype);
+
+    // retval type
+    if (!csr->type){
+        m_xml.printDataLine("keyword", "void");
+    } else {
+        if(csr->type->is_keyword){
+            m_xml.printDataLine("keyword", csr->type->type);
+        } else {
+            m_xml.printDataLine("identifier", csr->type->type);
+        }
+    }
+
+    // subroutine name
+    m_xml.printDataLine("identifier", csr->name->name);
+
+    // parameter list
+    m_xml.printDataLine("symbol", "(");
+
+    printParameterList(csr->parameterlist);
+
+    m_xml.printDataLine("symbol", ")");
+
+
+    m_xml.printDataTail("subroutineDec");
+}
+
+// ( (type varName) ( ',' type varName )* )?
+void OutputProgram::printParameterList(JC_Parameter* param)
+{
+    m_xml.printDataHead("parameterList");
+    while(param)
+    {
+        JC_Type* ty = param->type;
+        JC_VarName* varname = param->varname;
+
+        if(ty->is_keyword)
+        {
+            m_xml.printDataLine("keyword", ty->type);
+        }
+        else
+        {
+            m_xml.printDataLine("identifier", ty->type);
+        }
+
+        m_xml.printDataLine("identifier", varname->name);
+
+        if(param->next){
+            m_xml.printDataLine("symbol", ",");
+        }
+        param = param->next;
+    }
+    m_xml.printDataTail("parameterList");
 }

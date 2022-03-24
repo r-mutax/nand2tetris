@@ -50,8 +50,14 @@ JC_Class* CompilationEngine::compileClass()
     }
     cls->classVarDecs = cvd_head.next;
 
-    // // check subroutineDec
-    // while (compileSubroutine()) {};
+    // check subroutineDec
+    JC_Subroutine subr_head;
+    JC_Subroutine* subr_cur = &subr_head;
+    while(subr_cur){
+        subr_cur->next = compileSubroutine();
+        subr_cur = subr_cur->next;
+    }
+    cls->classSubroutinDecs = subr_head.next;
 
     // check "}"
     if(jt.tokenType() == JackTokenizer::SYMBOL && jt.symbol() == "}"){
@@ -172,52 +178,60 @@ JC_VarName* CompilationEngine::compileVarName()
     return nullptr;
 }
 
-bool CompilationEngine::compileSubroutineName()
+// identifier
+JC_SubroutineName* CompilationEngine::compileSubroutineName()
 {
     if(jt.tokenType() == JackTokenizer::IDENTIFIER)
     {
-        m_xml.printDataLine("identifier", jt.identifier());
+        JC_SubroutineName* subname = new JC_SubroutineName();
+
+        subname->name = jt.identifier();
         jt.advance();
-        return true;
+        return subname;
     }
-    return false;
+    return nullptr;
 }
 
-bool CompilationEngine::compileParameterList()
+// ( (type varName) ( ',' type varName )* )?
+JC_Parameter* CompilationEngine::compileParameterList()
 {
-    m_xml.printDataHead("parameterList");
-
-    if (jt.tokenType() != JackTokenizer::SYMBOL
-        || jt.symbol() != ")")
+    if (jt.tokenType() == JackTokenizer::SYMBOL
+        && jt.symbol() == ")")
     {
-        while(1)
-        {
-            compileType();
-            compileVarName();
-
-            if (jt.tokenType() != JackTokenizer::SYMBOL
-                || jt.symbol() != ",")
-            {
-                break;
-            }
-            else
-            {
-                m_xml.printDataLine("symbol", jt.symbol());
-                jt.advance();
-            }
-        }
+        return nullptr;
     }
 
-    m_xml.printDataTail("parameterList");
+    JC_Parameter head;
+    JC_Parameter* cur = &head;
 
-    return true;
+    while(1){
+        cur->next = new JC_Parameter();
+
+        cur->next->type = compileType();
+        cur->next->varname = compileVarName();
+
+        if(jt.tokenType() == JackTokenizer::SYMBOL)
+        {
+            if(jt.symbol() == ")"){
+                break;
+            } else if(jt.symbol() == ","){
+                jt.advance();
+            } else {
+                std::cerr << "JC_Parameter : unexpected error." << std::endl;
+                exit(1);
+            }
+        }
+        cur = cur->next;
+    }
+
+    return head.next;
 }
 
 // ('constructor' | 'function' | 'method')
 // ('void' | type) subroutineName '('
 //  parameterList ')'
 // subroutineBody
-bool CompilationEngine::compileSubroutine()
+JC_Subroutine* CompilationEngine::compileSubroutine()
 {
     // is SubroutineDec?
     if (jt.tokenType() != JackTokenizer::KEYWORD
@@ -225,48 +239,50 @@ bool CompilationEngine::compileSubroutine()
             && jt.keyword() != "function"
             &&  jt.keyword() != "method")
     ){
-        return false;
+        return nullptr;
     }
 
-    m_xml.printDataHead("subroutineDec");
- 
+    JC_Subroutine*  subroutine = new JC_Subroutine();
+    
     // ('constructor' | 'function' | 'method')
-    m_xml.printDataLine("keyword", jt.keyword());
+    subroutine->subroutinetype = jt.keyword();
     jt.advance();
 
     // ('void' | type)
     if(jt.tokenType() == JackTokenizer::KEYWORD && jt.keyword() == "void"){
-        m_xml.printDataLine("keyword", jt.keyword());
+        subroutine->type = nullptr;
         jt.advance();
     } else {
-        compileType();
+        subroutine->type = compileType();
     }
 
     // subroutineName
-    compileSubroutineName();
+    subroutine->name = compileSubroutineName();
 
     // check "("
-    if(jt.tokenType() == JackTokenizer::SYMBOL)
+    if(jt.tokenType() != JackTokenizer::SYMBOL
+        || jt.symbol() != "(")
     {
-        m_xml.printDataLine("symbol", jt.symbol());
-        jt.advance();
+        std::cerr << "Expect ( ." << std::endl;
+        exit(1);
     }
+    jt.advance();
 
     // paramaterList
-    compileParameterList();
+    subroutine->parameterlist = compileParameterList();
 
     // check ")"
-    if(jt.tokenType() == JackTokenizer::SYMBOL)
+    if(jt.tokenType() != JackTokenizer::SYMBOL
+        || jt.symbol() != ")")
     {
-        m_xml.printDataLine("symbol", jt.symbol());
-        jt.advance();
+        std::cerr << "Expect ) ." << std::endl;
+        exit(1);        
     }
+    jt.advance();
 
-    compileSubroutineBody();
+    // compileSubroutineBody();
 
-    m_xml.printDataTail("subroutineDec");
-
-    return true;
+    return subroutine;
 }
 
 // '{' varDec* statements '}'
