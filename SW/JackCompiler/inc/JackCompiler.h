@@ -91,6 +91,8 @@ class OutputProgram
         void printClassVarDec(JC_ClassVarDec* cvd);
         void printClassSubroutine(JC_Subroutine* csr);
         void printParameterList(JC_Parameter* param);
+        void printSubroutineBody(JC_SubroutineBody* body);
+        void printVarDec(JC_VarDec* vardec);
     public:
         OutputProgram(){};
         void SetFileName(std::string path);
@@ -111,8 +113,8 @@ class CompilationEngine
         JC_Subroutine* compileSubroutine();
         JC_SubroutineName* compileSubroutineName();
         JC_Parameter* compileParameterList();
-        bool compileSubroutineBody();
-        bool compileVarDec();
+        JC_SubroutineBody* compileSubroutineBody();
+        JC_VarDec* compileVarDec();
 
     public:
         CompilationEngine(const std::string path);

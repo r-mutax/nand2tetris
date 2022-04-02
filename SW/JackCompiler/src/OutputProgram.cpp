@@ -91,6 +91,8 @@ void OutputProgram::printClassSubroutine(JC_Subroutine* csr)
 
     m_xml.printDataLine("symbol", ")");
 
+    // subroutine body
+    printSubroutineBody(csr->body);
 
     m_xml.printDataTail("subroutineDec");
 }
@@ -121,4 +123,55 @@ void OutputProgram::printParameterList(JC_Parameter* param)
         param = param->next;
     }
     m_xml.printDataTail("parameterList");
+}
+
+// '{' varDec* statements '}'
+void OutputProgram::printSubroutineBody(JC_SubroutineBody* body)
+{
+    if(body == nullptr){
+        std::cerr << "expect subroutinebody." << std::endl;
+        exit(1);
+    }
+
+    m_xml.printDataHead("subroutineBody");
+
+    m_xml.printDataLine("symbol", "{");
+
+    // print VarDecs
+    JC_VarDec* cur = body->vardec;
+    while(cur)
+    {
+        printVarDec(cur);
+        cur = cur->next;
+    }
+
+    // print statements
+
+
+    m_xml.printDataLine("symbol", "}");
+
+    m_xml.printDataTail("subroutineBody");
+}
+
+// 'var' type varName (',' varName) * ';'
+void OutputProgram::printVarDec(JC_VarDec* vardec)
+{
+    m_xml.printDataHead("varDec");
+    m_xml.printDataLine("keyword", "var");
+    JC_Type* type = ((JC_Type*)(vardec->type));
+    m_xml.printDataLine(type->is_keyword ? "keyword" : "identifier", type->type);
+
+    JC_VarName* varname = vardec->varname;
+
+    m_xml.printDataLine("identifier", varname->name);
+    varname = varname->next;
+
+    while(varname){
+        m_xml.printDataLine("symbol", ",");
+        m_xml.printDataLine("identifier", varname->name);
+        varname = varname->next;
+    }
+    vardec = vardec->next;
+    m_xml.printDataLine("symbol", ";");
+    m_xml.printDataTail("varDec");
 }

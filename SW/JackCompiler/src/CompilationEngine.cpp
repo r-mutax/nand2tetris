@@ -280,76 +280,85 @@ JC_Subroutine* CompilationEngine::compileSubroutine()
     }
     jt.advance();
 
-    // compileSubroutineBody();
+    subroutine->body = compileSubroutineBody();
 
     return subroutine;
 }
 
 // '{' varDec* statements '}'
-bool CompilationEngine::compileSubroutineBody()
+JC_SubroutineBody* CompilationEngine::compileSubroutineBody()
 {
-    m_xml.printDataHead("subroutineBody");
-
     // check "{"
-    if(jt.tokenType() == JackTokenizer::SYMBOL)
+    if(jt.tokenType() != JackTokenizer::SYMBOL
+        || jt.symbol() != "{")
     {
-        m_xml.printDataLine("symbol", jt.symbol());
-        jt.advance();
+        std::cerr << "Expect { ." << std::endl;
+        exit(1);        
     }
+    jt.advance();
 
-    // check VarDec
-    while (compileVarDec()){};
+    JC_SubroutineBody* subroutinebody = new JC_SubroutineBody();
+
+    // varDec*
+
+    JC_VarDec head_vardec;
+    JC_VarDec* cur_vardec = &head_vardec;
+    while(cur_vardec){
+        cur_vardec->next = compileVarDec();
+        cur_vardec = cur_vardec->next;
+    }
+    subroutinebody->vardec = head_vardec.next;
 
 
+    // statements
+    // compileStatements();
 
 
     // check "}"
-    if(jt.tokenType() == JackTokenizer::SYMBOL)
+    if(jt.tokenType() != JackTokenizer::SYMBOL
+        || jt.symbol() != "}")
     {
-        m_xml.printDataLine("symbol", jt.symbol());
-        jt.advance();
+        std::cerr << "Expect } ." << std::endl;
+        //exit(1);        
     }
+    jt.advance();
 
-    m_xml.printDataTail("subroutineBody");
-
-    return true;
+    return subroutinebody;
 }
 
 // 'var' type varName (',' varName) * ';'
-bool CompilationEngine::compileVarDec()
+JC_VarDec* CompilationEngine::compileVarDec()
 {
     if (jt.tokenType() != JackTokenizer::KEYWORD
         || jt.keyword() != "var")
     {
-        return false;
+        return nullptr;
     }
-
-    m_xml.printDataHead("varDec");
-
-    m_xml.printDataLine("keyword", jt.keyword());
     jt.advance();
 
-    compileType();
-    while(1)
+    JC_VarDec* vardec = new JC_VarDec();
+
+    vardec->type = compileType();
+    vardec->varname = compileVarName();
+
+    JC_VarName* varname = vardec->varname;
+
+    while(jt.tokenType() == JackTokenizer::SYMBOL
+        && jt.symbol() == ",")
     {
-        compileVarName();
-        if(jt.tokenType() != JackTokenizer::SYMBOL
-            || jt.symbol() != ",")
-        {
-            break;
-        }
-        else
-        {
-            m_xml.printDataLine("symbol", jt.symbol());
-            jt.advance();
-        }
+        jt.advance();
+        varname->next = compileVarName();
+        varname = varname->next;
     }
 
-    // check ;
-    m_xml.printDataLine("symbol", jt.symbol());
+    // check ";"
+    if(jt.tokenType() != JackTokenizer::SYMBOL
+        || jt.symbol() != ";")
+    {
+        std::cerr << "Expect ; ." << std::endl;
+        exit(1);        
+    }
     jt.advance();
 
-    m_xml.printDataTail("varDec");
-
-    return true;
+    return vardec;
 }

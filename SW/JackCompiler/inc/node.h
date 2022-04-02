@@ -61,12 +61,35 @@ class JC_Parameter : JC_Element
         JC_Parameter*   next;
 };
 
+class JC_VarDec : public JC_Element
+{
+    public:
+        JC_VarDec(){
+            next = nullptr;
+            type = nullptr;
+            varname = nullptr;
+        }   
+        JC_VarDec* next;
+        JC_Type* type;
+        JC_VarName* varname;
+};
+
+class JC_SubroutineBody : public JC_Element
+{
+    public:
+        JC_SubroutineBody(){
+            vardec = nullptr;
+        };
+        JC_VarDec* vardec;
+};
+
 class JC_Subroutine : public JC_Element
 {
     public:
         std::string         subroutinetype;
         JC_Type*            type;
         JC_SubroutineName*  name;
+        JC_SubroutineBody*  body;
         JC_Parameter*       parameterlist;
         JC_Subroutine*      next;
         
@@ -103,5 +126,6 @@ class JC_Program : public JC_Element
         }
         JC_Class* cls;
 };
+
 
 #endif
