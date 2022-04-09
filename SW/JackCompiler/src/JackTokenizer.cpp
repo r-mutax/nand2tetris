@@ -238,14 +238,89 @@ std::string JackTokenizer::identifier()
     return tokens.front().str;
 }
 
+void JackTokenizer::stash_front_token()
+{
+    stash_token = tokens.front();
+    tokens.pop_front();
+}
+
+void JackTokenizer::stash_pop_front_token()
+{
+    tokens.push_front(stash_token);
+}
+
 // get next_tokentype.
 JackTokenizer::TK_TYPE JackTokenizer::next_tokenType()
 {
-    Token tok = tokens.front();
-    tokens.pop_front();
+    stash_front_token();
 
     TK_TYPE tk_type = tokens.front().type;
-    tokens.push_front(tok);
+
+    stash_pop_front_token();
 
     return tk_type;
+}
+
+std::string JackTokenizer::next_keyword()
+{
+    std::string ret_keyword;
+
+    stash_front_token();
+
+    ret_keyword = tokens.front().str;
+
+    stash_pop_front_token();
+
+    return ret_keyword;
+}
+
+std::string JackTokenizer::next_symbol()
+{
+    std::string ret_symbol;
+
+    stash_front_token();
+
+    ret_symbol = tokens.front().str;
+
+    stash_pop_front_token();
+
+    return ret_symbol;
+}
+
+int32_t JackTokenizer::next_intVal()
+{
+    int32_t retval = 0;
+    stash_front_token();
+
+    retval = tokens.front().data;
+
+    stash_pop_front_token();
+
+    return retval;
+}
+
+std::string JackTokenizer::next_stringVal()
+{
+    std::string ret_stringVal;
+
+    stash_front_token();
+
+    ret_stringVal = tokens.front().str;
+
+    stash_pop_front_token();
+
+    return ret_stringVal;
+}
+
+std::string JackTokenizer::next_identifier()
+{
+    std::string ret_identifier;
+
+    stash_front_token();
+
+    ret_identifier = tokens.front().str;
+
+    stash_pop_front_token();
+
+    return ret_identifier;
 }
