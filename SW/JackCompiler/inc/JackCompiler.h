@@ -53,6 +53,7 @@ class JackTokenizer
         int32_t intVal();
         std::string stringVal();
         std::string identifier();
+        TK_TYPE next_tokenType(void);
     private:
         typedef struct _Token
         {
@@ -73,7 +74,7 @@ class JackTokenizer
 
         std::ifstream   m_ifs;
         GenXMLFile      m_xml;
-        std::queue<Token>  tokens;
+        std::deque<Token>  tokens;
         int lebel = 0;
         bool isInComment = false;
         bool hasToken = true;

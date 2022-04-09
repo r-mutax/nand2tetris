@@ -16,7 +16,7 @@ void JackTokenizer::Open(const std::string path)
     size_t  dot_pos = path.rfind(".");
     std::string xml_path = path.substr(0, dot_pos);
 
-    m_xml.openXMLFile(xml_path + "T.xml");
+    //m_xml.openXMLFile(xml_path + "T.xml");
 
     readTokens();
 }
@@ -49,7 +49,7 @@ void JackTokenizer::readTokens()
 
 void JackTokenizer::advance()
 {
-    tokens.pop();
+    tokens.pop_front();
 
     // when tokens pool is empty, read next tokens from file.
     if(tokens.size() == 0){
@@ -92,7 +92,7 @@ void JackTokenizer::tokenizeLine(std::string buf)
         if(isKeyWord(buf, idx, tk.str))
         {
             tk.type = KEYWORD;
-            tokens.push(tk);
+            tokens.push_back(tk);
             idx += tk.str.length();
             tk.reset();
             continue;
@@ -101,7 +101,7 @@ void JackTokenizer::tokenizeLine(std::string buf)
         if(isSymbol(buf, idx, tk.str))
         {
             tk.type = SYMBOL;
-            tokens.push(tk);
+            tokens.push_back(tk);
             idx += tk.str.length();
             tk.reset();
             continue;
@@ -123,7 +123,7 @@ void JackTokenizer::tokenizeLine(std::string buf)
             } while(1);
             tk.type = INT_CONST;
             tk.data = std::stol(digitbuf);
-            tokens.push(tk);
+            tokens.push_back(tk);
             tk.reset();
             continue;
         }
@@ -139,7 +139,7 @@ void JackTokenizer::tokenizeLine(std::string buf)
             }
 
             tk.type = STRING_CONST;
-            tokens.push(tk);
+            tokens.push_back(tk);
             tk.reset();
             idx++;
             continue;
@@ -153,7 +153,7 @@ void JackTokenizer::tokenizeLine(std::string buf)
             } while(isident1(buf[idx]) || isdigit(buf[idx]));
 
             tk.type = IDENTIFIER;
-            tokens.push(tk);
+            tokens.push_back(tk);
             tk.reset();
             continue;
         }
@@ -236,4 +236,16 @@ std::string JackTokenizer::stringVal()
 std::string JackTokenizer::identifier()
 {
     return tokens.front().str;
+}
+
+// get next_tokentype.
+JackTokenizer::TK_TYPE JackTokenizer::next_tokenType()
+{
+    Token tok = tokens.front();
+    tokens.pop_front();
+
+    TK_TYPE tk_type = tokens.front().type;
+    tokens.push_front(tok);
+
+    return tk_type;
 }
