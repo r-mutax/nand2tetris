@@ -93,6 +93,10 @@ class OutputProgram
         void printParameterList(JC_Parameter* param);
         void printSubroutineBody(JC_SubroutineBody* body);
         void printVarDec(JC_VarDec* vardec);
+        void printStatements(JC_Statement* statements);
+        void printLetStatement(JC_LetStatement* letstatements);
+        void printExpression(JC_Expression* expression);
+        void printTerm(JC_Term* term);
     public:
         OutputProgram(){};
         void SetFileName(std::string path);
@@ -115,6 +119,11 @@ class CompilationEngine
         JC_Parameter* compileParameterList();
         JC_SubroutineBody* compileSubroutineBody();
         JC_VarDec* compileVarDec();
+        JC_Statement* compileStatements();
+        JC_Statement* compileSingleStatement();
+        JC_Statement* compileLet();
+        JC_Expression* compileExpression();
+        JC_Term* compileTerm();
 
     public:
         CompilationEngine(const std::string path);

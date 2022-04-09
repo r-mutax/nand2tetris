@@ -311,8 +311,7 @@ JC_SubroutineBody* CompilationEngine::compileSubroutineBody()
 
 
     // statements
-    // compileStatements();
-
+    subroutinebody->statements = compileStatements();
 
     // check "}"
     if(jt.tokenType() != JackTokenizer::SYMBOL
@@ -361,4 +360,156 @@ JC_VarDec* CompilationEngine::compileVarDec()
     jt.advance();
 
     return vardec;
+}
+
+JC_Statement* CompilationEngine::compileStatements()
+{
+    JC_Statement head;
+    JC_Statement* cur = &head;
+    while(cur){
+        cur->next = compileSingleStatement();
+        cur = cur->next;
+    }
+
+    return head.next;
+}
+
+JC_Statement* CompilationEngine::compileSingleStatement()
+{
+    if(jt.tokenType() != JackTokenizer::KEYWORD)
+    {
+        return nullptr;
+    }
+
+    JC_Statement* retval = nullptr;
+
+    if(jt.keyword() == "let")
+    {
+        retval = compileLet();
+    }
+    else
+    {
+        std::cerr << "errorStatement." << std::endl;
+    }
+
+    return retval;
+}
+
+// "let" varName ( '[' expression ']')? '=' expression ';'
+JC_Statement* CompilationEngine::compileLet()
+{
+    JC_LetStatement* let = new JC_LetStatement();
+
+    // skip "let"
+    jt.advance();
+
+    // varName [ expression ]
+    JC_Variant* var = new JC_Variant();
+    var->varname = compileVarName();
+
+    if(jt.tokenType() == JackTokenizer::SYMBOL
+        && jt.symbol() == "[")
+    {
+        var->exp = compileExpression();
+
+        if(jt.tokenType() != JackTokenizer::SYMBOL
+            || jt.symbol() == "]" )
+        {
+            std::cerr << "Expect ] ." << std::endl;
+        }
+        jt.advance();
+    }
+    let->lhs = var;
+
+    // "=""
+    if(jt.tokenType() == JackTokenizer::SYMBOL
+        || jt.symbol() == "=")
+    {
+        std::cerr << "Expect = ." << std::endl;
+    }
+    jt.advance();
+
+    let->rhs = compileExpression();
+
+    // ";"
+    if(jt.tokenType() == JackTokenizer::SYMBOL
+        || jt.symbol() == ";")
+    {
+        std::cerr << "Expect ; ." << std::endl;
+    }
+
+    return let;
+}
+
+// term (op term)*
+JC_Expression* CompilationEngine::compileExpression()
+{
+    JC_Expression* exp = new JC_Expression();
+    
+    exp->term = compileTerm();
+
+    JC_Term* cur = exp->term;
+
+    while(cur){
+        if(jt.tokenType() != JackTokenizer::SYMBOL)
+        {
+            break;
+        }
+
+        // operand
+        cur->op = jt.symbol();
+        jt.advance();
+
+        cur->next = compileTerm();
+
+        cur = cur->next;
+    }
+
+    return exp;
+}
+
+// integerConstant | stringConstant
+// | keywordConstant | varName | varName '[' expression ']'
+// | subroutineCall | '(' expression ')' | unaryOp Term
+JC_Term* CompilationEngine::compileTerm()
+{
+    JC_Term* term = new JC_Term();
+    if(jt.tokenType() == JackTokenizer::INT_CONST)
+    {
+        term->termtype = INTEGER_CONST;
+        term->integerVal = jt.intVal();
+    } else if(jt.tokenType() == JackTokenizer::STRING_CONST) {
+        term->termtype = STRING_CONST;
+        term->stringVal = jt.stringVal();
+    } else if(jt.tokenType() == JackTokenizer::KEYWORD){
+        if( (jt.keyword() == "true")
+            || (jt.keyword() == "false")
+            || (jt.keyword() == "null")
+            || (jt.keyword() == "this")){
+            term->termtype = KEYWORD_CONST;
+            term->stringVal = jt.keyword();
+        } else {
+            std::cerr << "error keyword." << std::endl;
+            return nullptr;
+        }
+    } else if(jt.tokenType() == JackTokenizer::IDENTIFIER){
+        std::string ident = jt.identifier();
+        jt.advance();
+
+        // is variant, array or subroutineCall?
+        if(jt.tokenType() == JackTokenizer::SYMBOL){
+            
+            // array
+            if(jt.symbol() == "["){
+                
+            }
+        }
+
+        term->termtype = VARIANT;
+        term->var = new JC_Variant();
+        term->var->varname = new JC_VarName();
+        term->var->varname->name = ident;
+    }
+
+    return term;
 }

@@ -3,6 +3,9 @@
 
 #include <string>
 
+// forward definition.
+class JC_Variant;
+
 enum JC_NodeType {
     JC_NO_TYPE = 0,
     JC_PROGRAM,
@@ -74,6 +77,87 @@ class JC_VarDec : public JC_Element
         JC_VarName* varname;
 };
 
+enum StatementType {
+    LET_STATEMENT = 0
+    , IF_STATEMENT
+    , WHILE_STATEMENT
+    , DO_STATEMENT
+    , RETURN_STATEMENT
+    , UNKNOWN_STATEMENT
+};
+
+enum TermType {
+    INTEGER_CONST = 0
+    , STRING_CONST
+    , KEYWORD_CONST
+    , VARIANT
+    , SUBROUTINECALL
+    , EXPRESSION
+    , UNARYOP_TERM
+};
+
+class JC_Term : public JC_Element
+{
+    public:
+        JC_Term(){
+            op = "";
+            next = nullptr;
+        };
+        std::string op;
+        JC_Term*    next;
+        JC_Variant*  var;
+
+        TermType    termtype;
+        long        integerVal;
+        std::string stringVal;
+};
+
+class JC_Expression : public JC_Element
+{
+    public:
+        JC_Expression(){
+            term = nullptr;
+        };
+        JC_Term* term;
+};
+
+class JC_Variant : public JC_Element
+{
+    public:
+        JC_Variant()
+        {
+            varname = nullptr;
+            exp = nullptr;
+        }
+        JC_VarName* varname;
+        JC_Expression* exp;
+};
+
+class JC_Statement : public JC_Element
+{
+    public:
+    JC_Statement(){
+        type = UNKNOWN_STATEMENT;
+        next = nullptr;
+    };
+    StatementType   type;
+    JC_Statement* next;
+};
+
+class JC_LetStatement : public JC_Statement
+{
+    public:
+        JC_LetStatement(){
+            type = LET_STATEMENT;
+            lhs = nullptr;
+            rhs = nullptr;
+            next = nullptr;
+        };
+        JC_Variant* lhs;
+        JC_Expression* rhs;
+
+};
+
 class JC_SubroutineBody : public JC_Element
 {
     public:
@@ -81,6 +165,7 @@ class JC_SubroutineBody : public JC_Element
             vardec = nullptr;
         };
         JC_VarDec* vardec;
+        JC_Statement* statements;
 };
 
 class JC_Subroutine : public JC_Element
@@ -92,7 +177,6 @@ class JC_Subroutine : public JC_Element
         JC_SubroutineBody*  body;
         JC_Parameter*       parameterlist;
         JC_Subroutine*      next;
-        
 };
 
 class JC_ClassVarDec : public JC_Element

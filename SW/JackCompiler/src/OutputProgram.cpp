@@ -146,7 +146,7 @@ void OutputProgram::printSubroutineBody(JC_SubroutineBody* body)
     }
 
     // print statements
-
+    printStatements(body->statements);
 
     m_xml.printDataLine("symbol", "}");
 
@@ -174,4 +174,87 @@ void OutputProgram::printVarDec(JC_VarDec* vardec)
     vardec = vardec->next;
     m_xml.printDataLine("symbol", ";");
     m_xml.printDataTail("varDec");
+}
+
+void OutputProgram::printStatements(JC_Statement* statements)
+{
+    m_xml.printDataHead("statements");
+
+    JC_Statement* cur = statements;
+    while(cur){
+        switch(cur->type){
+            case LET_STATEMENT:
+                printLetStatement((JC_LetStatement*)cur);
+                break;
+        }
+        cur = cur->next;
+    }
+
+    m_xml.printDataTail("statements");
+
+}
+
+// "let" varName ( '[' expression ']')? '=' expression ';'
+void OutputProgram::printLetStatement(JC_LetStatement* letstatement)
+{
+    m_xml.printDataHead("letStatement");
+    
+    m_xml.printDataLine("keyword", "let");
+
+    // print lhs
+    JC_Variant* var = letstatement->lhs;
+    m_xml.printDataLine("identifier", var->varname->name);
+
+    // is array?
+    if(var->exp){
+        m_xml.printDataLine("symbol", "[");
+
+        // printExpression(var->exp);
+
+        m_xml.printDataLine("symbol", "]");
+    }
+
+    // print = 
+    m_xml.printDataLine("symbol", "=");
+
+    printExpression(letstatement->rhs);
+
+    // print ;
+    m_xml.printDataLine("symbol", ";");
+
+    m_xml.printDataTail("letStatement");
+}
+
+// integerConstant | stringConstant
+// | keywordConstant | varName | varName '[' expression ']'
+// | subroutineCall | '(' expression ')' | unaryOp Term
+void OutputProgram::printTerm(JC_Term* term)
+{
+    m_xml.printDataHead("term");
+
+    switch(term->termtype)
+    {
+        case INTEGER_CONST:
+            m_xml.printDataLine("integerConstant", std::to_string(term->integerVal));
+            break;
+        case STRING_CONST:
+            m_xml.printDataLine("stringConstant", std::to_string(term->integerVal));
+            break;
+        case VARIANT:
+            m_xml.printDataLine("identifier", term->var->varname->name);
+        default:
+            break;
+    }
+
+    m_xml.printDataTail("term");
+}
+
+// term (op term)*
+void OutputProgram::printExpression(JC_Expression* expression)
+{
+    m_xml.printDataHead("expression");
+
+    printTerm(expression->term);
+
+    m_xml.printDataTail("expression");
 }
