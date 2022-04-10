@@ -86,6 +86,13 @@ enum StatementType {
     , UNKNOWN_STATEMENT
 };
 
+class JC_Operand : public JC_Element {
+    public:
+        JC_Operand(){
+        };
+        std::string op;
+};
+
 enum TermType {
     INTEGER_CONST = 0
     , STRING_CONST
@@ -100,10 +107,10 @@ class JC_Term : public JC_Element
 {
     public:
         JC_Term(){
-            op = "";
+            op = nullptr;
             next = nullptr;
         };
-        std::string op;
+        JC_Operand* op;
         JC_Term*    next;
         JC_Variant*  var;
 

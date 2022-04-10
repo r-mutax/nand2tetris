@@ -422,8 +422,8 @@ JC_Statement* CompilationEngine::compileLet()
     let->lhs = var;
 
     // "=""
-    if(jt.tokenType() == JackTokenizer::SYMBOL
-        || jt.symbol() == "=")
+    if(jt.tokenType() != JackTokenizer::SYMBOL
+        || jt.symbol() != "=")
     {
         std::cerr << "Expect = ." << std::endl;
     }
@@ -432,13 +432,39 @@ JC_Statement* CompilationEngine::compileLet()
     let->rhs = compileExpression();
 
     // ";"
-    if(jt.tokenType() == JackTokenizer::SYMBOL
-        || jt.symbol() == ";")
+    if(jt.tokenType() != JackTokenizer::SYMBOL
+        || jt.symbol() != ";")
     {
         std::cerr << "Expect ; ." << std::endl;
     }
+    jt.advance();
 
     return let;
+}
+
+JC_Operand* CompilationEngine::compileOp()
+{
+    if(jt.tokenType() != JackTokenizer::SYMBOL)
+    {
+        return nullptr;
+    }
+
+    if((jt.symbol() == "+")
+        || (jt.symbol() == "-")
+        || (jt.symbol() == "*")
+        || (jt.symbol() == "/")
+        || (jt.symbol() == "&")
+        || (jt.symbol() == "|")
+        || (jt.symbol() == "<")
+        || (jt.symbol() == ">")
+        || (jt.symbol() == "=")){
+
+            JC_Operand* ope = new JC_Operand();
+            ope->op = jt.symbol();
+            return ope;
+    }
+
+    return nullptr;
 }
 
 // term (op term)*
@@ -457,11 +483,12 @@ JC_Expression* CompilationEngine::compileExpression()
         }
 
         // operand
-        cur->op = jt.symbol();
-        jt.advance();
+        cur->op = compileOp();
+        if(cur->op == nullptr){
+            break;
+        }
 
         cur->next = compileTerm();
-
         cur = cur->next;
     }
 
@@ -493,23 +520,41 @@ JC_Term* CompilationEngine::compileTerm()
             return nullptr;
         }
     } else if(jt.tokenType() == JackTokenizer::IDENTIFIER){
-        std::string ident = jt.identifier();
-        jt.advance();
 
-        // is variant, array or subroutineCall?
-        if(jt.tokenType() == JackTokenizer::SYMBOL){
-            
-            // array
-            if(jt.symbol() == "["){
-                
-            }
+        if((jt.next_tokenType() == JackTokenizer::SYMBOL)
+            && (jt.next_symbol() == "(")){
+            // subroutine call
+        } else {
+            // array or variant
+            term->termtype = VARIANT;
+            term->var = compileVariant();
         }
-
-        term->termtype = VARIANT;
-        term->var = new JC_Variant();
-        term->var->varname = new JC_VarName();
-        term->var->varname->name = ident;
     }
 
     return term;
+}
+
+// varName | varName '[' expression ']'
+JC_Variant* CompilationEngine::compileVariant()
+{
+    JC_Variant* var = new JC_Variant();
+
+    var->varname = compileVarName();
+
+    // is array?
+    if(jt.tokenType() == JackTokenizer::SYMBOL
+        && jt.symbol() == "[")
+    {
+        jt.advance();
+        var->exp = compileExpression();
+
+        if(jt.tokenType() == JackTokenizer::SYMBOL
+            && jt.symbol() == "]")
+        {
+            jt.advance();
+        } else {
+            std::cerr << "[error] expected ']'." << std::endl;
+        }
+    }
+    return var;
 }

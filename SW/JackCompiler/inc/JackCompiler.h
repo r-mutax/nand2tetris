@@ -134,7 +134,8 @@ class CompilationEngine
         JC_Statement* compileLet();
         JC_Expression* compileExpression();
         JC_Term* compileTerm();
-
+        JC_Variant* compileVariant();
+        JC_Operand* compileOp();
     public:
         CompilationEngine(const std::string path);
         ~CompilationEngine(void);
