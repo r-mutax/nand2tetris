@@ -191,6 +191,16 @@ class JC_DoStatement : public JC_Statement
         JC_SubroutineCall* subcall;
 };
 
+class JC_ReturnStatement : public JC_Statement
+{
+    public:
+        JC_ReturnStatement(){
+            type = RETURN_STATEMENT;
+            exp = nullptr;
+        }
+        JC_Expression* exp;
+};
+
 class JC_SubroutineBody : public JC_Element
 {
     public:

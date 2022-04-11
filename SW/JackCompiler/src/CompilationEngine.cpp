@@ -391,6 +391,10 @@ JC_Statement* CompilationEngine::compileSingleStatement()
     {
         retval = compileDo();
     }
+    else if(jt.keyword() == "return")
+    {
+        retval = compileReturn();
+    }
     else
     {
         std::cerr << "errorStatement." << std::endl;
@@ -531,6 +535,27 @@ JC_Statement* CompilationEngine::compileDo()
     jt.advance();
 
     return DoStatement;
+}
+JC_Statement* CompilationEngine::compileReturn()
+{
+    JC_ReturnStatement* ret = new JC_ReturnStatement();
+
+    // skip "return".
+    jt.advance();
+
+    // ";"
+    if(jt.tokenType() != JackTokenizer::SYMBOL
+        || jt.symbol() != ";")
+    {
+        // next token is not ";".
+        // there is expected having expression.
+        ret->exp = compileExpression();
+    }
+
+    // Here the token should be ";".
+    jt.advance();
+
+    return ret;
 }
 
 JC_Operand* CompilationEngine::compileOp()

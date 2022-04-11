@@ -189,6 +189,9 @@ void OutputProgram::printStatements(JC_Statement* statements)
             case DO_STATEMENT:
                 printDoStatement((JC_DoStatement*)cur);
                 break;
+            case RETURN_STATEMENT:
+                printReturnStatejeht((JC_ReturnStatement*)cur);
+                break;
         }
         cur = cur->next;
     }
@@ -247,11 +250,27 @@ void OutputProgram::printDoStatement(JC_DoStatement* dostatement)
     printExpressionList(subcall->exp);
 
     m_xml.printDataLine("symbol", ")");
-    
+
     m_xml.printDataLine("symbol", ";");
 
     m_xml.printDataTail("doStatement");
 }
+
+void OutputProgram::printReturnStatejeht(JC_ReturnStatement* returnstatement)
+{
+    m_xml.printDataHead("returnStatement");
+
+    m_xml.printDataLine("keyword", "return");
+
+    if(returnstatement->exp){
+        printExpression(returnstatement->exp);
+    }
+
+    m_xml.printDataLine("symbol", ";");
+
+    m_xml.printDataTail("returnStatement");
+}
+
 
 // integerConstant | stringConstant
 // | keywordConstant | varName | varName '[' expression ']'

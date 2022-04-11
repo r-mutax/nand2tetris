@@ -106,6 +106,7 @@ class OutputProgram
         void printStatements(JC_Statement* statements);
         void printLetStatement(JC_LetStatement* letstatements);
         void printDoStatement(JC_DoStatement* dostatemene);
+        void printReturnStatejeht(JC_ReturnStatement* returnstatement);
         void printExpression(JC_Expression* expression);
         void printExpressionList(JC_Expression* exp_list);
         void printTerm(JC_Term* term);
@@ -136,6 +137,7 @@ class CompilationEngine
         JC_Statement* compileSingleStatement();
         JC_Statement* compileLet();
         JC_Statement* compileDo();
+        JC_Statement* compileReturn();
         JC_Expression* compileExpression();
         JC_Term* compileTerm();
         JC_Variant* compileVariant();
