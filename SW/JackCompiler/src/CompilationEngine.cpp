@@ -387,6 +387,10 @@ JC_Statement* CompilationEngine::compileSingleStatement()
     {
         retval = compileLet();
     }
+    else if(jt.keyword() == "do")
+    {
+        retval = compileDo();
+    }
     else
     {
         std::cerr << "errorStatement." << std::endl;
@@ -421,7 +425,7 @@ JC_Statement* CompilationEngine::compileLet()
     }
     let->lhs = var;
 
-    // "=""
+    // "="
     if(jt.tokenType() != JackTokenizer::SYMBOL
         || jt.symbol() != "=")
     {
@@ -440,6 +444,93 @@ JC_Statement* CompilationEngine::compileLet()
     jt.advance();
 
     return let;
+}
+
+JC_Expression* CompilationEngine::compileExpressionList()
+{
+    JC_Expression* exp = compileExpression();
+    JC_Expression* cur = exp;
+
+    while(cur){
+        if((jt.tokenType() != JackTokenizer::SYMBOL)
+            || (jt.symbol() != ",")){
+            break;
+        }
+
+        cur->next = compileExpression();
+        cur = cur->next;
+    }
+
+    return exp;
+}
+
+JC_SubroutineCall* CompilationEngine::compileSubroutineCall()
+{
+    JC_SubroutineCall* subcall = new JC_SubroutineCall();
+
+    if(jt.tokenType() != JackTokenizer::IDENTIFIER){
+        std::cerr << "[error] expect identifier." << std::endl;
+        exit(1);
+    }
+
+    // is classmethod ?
+    if((jt.next_tokenType() == JackTokenizer::SYMBOL)
+        && (jt.next_symbol() == "."))
+    {
+        subcall->classname = jt.identifier();
+        jt.advance();
+
+        // skip ".".
+        jt.advance();
+    }
+
+    // subroutine name
+    subcall->subroutine_name = compileSubroutineName();
+
+    // "("
+    if(jt.tokenType() != JackTokenizer::SYMBOL
+        || jt.symbol() != "(")
+    {
+        std::cerr << "Expect = (" << std::endl;
+    }
+    jt.advance();
+
+    // has expressio list?
+    if(jt.tokenType() != JackTokenizer::SYMBOL
+        || jt.symbol() != ")")
+    {
+        subcall->exp = compileExpressionList();
+    }
+
+    // ")"
+    if(jt.tokenType() != JackTokenizer::SYMBOL
+        || jt.symbol() != ")")
+    {
+        std::cerr << "Expect = )" << std::endl;
+    }
+    jt.advance();
+
+    return subcall;
+}
+
+JC_Statement* CompilationEngine::compileDo()
+{
+    JC_DoStatement* DoStatement = new JC_DoStatement();
+
+    // skip "Do".
+    jt.advance();
+
+    DoStatement->subcall = compileSubroutineCall();
+
+    // ";"
+    if(jt.tokenType() != JackTokenizer::SYMBOL
+        || jt.symbol() != ";")
+    {
+        std::cerr << "Expect ; ." << std::endl;
+    }
+    jt.advance();
+
+    return DoStatement;
 }
 
 JC_Operand* CompilationEngine::compileOp()
@@ -529,7 +620,11 @@ JC_Term* CompilationEngine::compileTerm()
             term->termtype = VARIANT;
             term->var = compileVariant();
         }
+    } else {
+        delete term;
+        term = nullptr;
     }
+
 
     return term;
 }

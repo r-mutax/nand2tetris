@@ -124,8 +124,10 @@ class JC_Expression : public JC_Element
     public:
         JC_Expression(){
             term = nullptr;
+            next = nullptr;
         };
         JC_Term* term;
+        JC_Expression* next;
 };
 
 class JC_Variant : public JC_Element
@@ -137,6 +139,20 @@ class JC_Variant : public JC_Element
             exp = nullptr;
         }
         JC_VarName* varname;
+        JC_Expression* exp;
+};
+
+class JC_SubroutineCall : public JC_Element
+{
+    public:
+        JC_SubroutineCall(){
+            subroutine_name = nullptr;
+            exp = nullptr;
+            classname = "";
+        };
+
+        JC_SubroutineName* subroutine_name;
+        std::string classname;
         JC_Expression* exp;
 };
 
@@ -163,6 +179,16 @@ class JC_LetStatement : public JC_Statement
         JC_Variant* lhs;
         JC_Expression* rhs;
 
+};
+
+class JC_DoStatement : public JC_Statement
+{
+    public:
+        JC_DoStatement(){
+            type = DO_STATEMENT;
+            subcall = nullptr;
+        }
+        JC_SubroutineCall* subcall;
 };
 
 class JC_SubroutineBody : public JC_Element

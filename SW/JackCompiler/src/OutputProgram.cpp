@@ -186,6 +186,9 @@ void OutputProgram::printStatements(JC_Statement* statements)
             case LET_STATEMENT:
                 printLetStatement((JC_LetStatement*)cur);
                 break;
+            case DO_STATEMENT:
+                printDoStatement((JC_DoStatement*)cur);
+                break;
         }
         cur = cur->next;
     }
@@ -225,6 +228,31 @@ void OutputProgram::printLetStatement(JC_LetStatement* letstatement)
     m_xml.printDataTail("letStatement");
 }
 
+void OutputProgram::printDoStatement(JC_DoStatement* dostatement)
+{
+    m_xml.printDataHead("doStatement");
+
+    m_xml.printDataLine("keyword", "do");
+
+    JC_SubroutineCall* subcall = dostatement->subcall;
+
+    if(subcall->classname != ""){
+        m_xml.printDataLine("identifier", subcall->classname);
+        m_xml.printDataLine("symbol", ".");
+    }
+
+    m_xml.printDataLine("identifier", subcall->subroutine_name->name);
+    m_xml.printDataLine("symbol", "(");
+
+    printExpressionList(subcall->exp);
+
+    m_xml.printDataLine("symbol", ")");
+    
+    m_xml.printDataLine("symbol", ";");
+
+    m_xml.printDataTail("doStatement");
+}
+
 // integerConstant | stringConstant
 // | keywordConstant | varName | varName '[' expression ']'
 // | subroutineCall | '(' expression ')' | unaryOp Term
@@ -242,6 +270,7 @@ void OutputProgram::printTerm(JC_Term* term)
             break;
         case VARIANT:
             m_xml.printDataLine("identifier", term->var->varname->name);
+            break;
         default:
             break;
     }
@@ -257,4 +286,21 @@ void OutputProgram::printExpression(JC_Expression* expression)
     printTerm(expression->term);
 
     m_xml.printDataTail("expression");
+}
+
+void OutputProgram::printExpressionList(JC_Expression* exp_list)
+{
+    m_xml.printDataHead("expressionList");
+
+    if(exp_list){
+        printExpression(exp_list);
+
+        JC_Expression* cur = exp_list->next;
+        
+        while(cur){
+            m_xml.printDataLine("symbol", ",");
+            printExpression(cur);
+        }
+    }
+    m_xml.printDataTail("expressionList");
 }
