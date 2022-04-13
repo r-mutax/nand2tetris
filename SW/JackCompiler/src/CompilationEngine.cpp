@@ -22,8 +22,8 @@ void CompilationEngine::compile(void)
 // 'class' className '{' classVarDec* subroutineDec* '}'
 JC_Class* CompilationEngine::compileClass()
 {
-    if (jt.tokenType() != JackTokenizer::KEYWORD
-        || jt.keyword() != "class") {
+    if(!jt.expect_token(JackTokenizer::KEYWORD, "class"))
+    {
         return nullptr;
     }
     jt.advance();
@@ -37,7 +37,7 @@ JC_Class* CompilationEngine::compileClass()
     }
 
     // check "{"
-    if(jt.tokenType() == JackTokenizer::SYMBOL && jt.symbol() == "{"){
+    if(jt.expect_token(JackTokenizer::SYMBOL, "{")){
         jt.advance();
     }
 
@@ -60,9 +60,10 @@ JC_Class* CompilationEngine::compileClass()
     cls->classSubroutinDecs = subr_head.next;
 
     // check "}"
-    if(jt.tokenType() == JackTokenizer::SYMBOL && jt.symbol() == "}"){
+    if(jt.expect_token(JackTokenizer::SYMBOL, "}")){
         jt.advance();
     }
+
 
     return cls;
 }
@@ -103,9 +104,8 @@ JC_ClassVarDec* CompilationEngine::compileClassVarDec()
     JC_VarName* cur_varname = cvd->VarName;
     // (',' varName) *
     do {
-        if(jt.tokenType() != JackTokenizer::SYMBOL
-            || jt.symbol() != ","
-        ){
+        if(!jt.expect_token(JackTokenizer::SYMBOL, ","))
+        {
             break;
         }
         jt.advance();
@@ -120,10 +120,7 @@ JC_ClassVarDec* CompilationEngine::compileClassVarDec()
     
     } while (1);
 
-    if(jt.tokenType() != JackTokenizer::SYMBOL
-        || jt.symbol() != ";"
-    )
-    {
+    if(!jt.expect_token(JackTokenizer::SYMBOL, ";")){
         std::cerr << "Expect \";\" ." << std::endl;
         exit(1);
     }
@@ -195,9 +192,7 @@ JC_SubroutineName* CompilationEngine::compileSubroutineName()
 // ( (type varName) ( ',' type varName )* )?
 JC_Parameter* CompilationEngine::compileParameterList()
 {
-    if (jt.tokenType() == JackTokenizer::SYMBOL
-        && jt.symbol() == ")")
-    {
+    if(jt.expect_token(JackTokenizer::SYMBOL, ")")){
         return nullptr;
     }
 
@@ -249,7 +244,7 @@ JC_Subroutine* CompilationEngine::compileSubroutine()
     jt.advance();
 
     // ('void' | type)
-    if(jt.tokenType() == JackTokenizer::KEYWORD && jt.keyword() == "void"){
+    if(jt.expect_token(JackTokenizer::KEYWORD, "void")){
         subroutine->type = nullptr;
         jt.advance();
     } else {
@@ -260,9 +255,7 @@ JC_Subroutine* CompilationEngine::compileSubroutine()
     subroutine->name = compileSubroutineName();
 
     // check "("
-    if(jt.tokenType() != JackTokenizer::SYMBOL
-        || jt.symbol() != "(")
-    {
+    if(!jt.expect_token(JackTokenizer::SYMBOL, "(")){
         std::cerr << "Expect ( ." << std::endl;
         exit(1);
     }
@@ -272,12 +265,11 @@ JC_Subroutine* CompilationEngine::compileSubroutine()
     subroutine->parameterlist = compileParameterList();
 
     // check ")"
-    if(jt.tokenType() != JackTokenizer::SYMBOL
-        || jt.symbol() != ")")
-    {
+    if(!jt.expect_token(JackTokenizer::SYMBOL, ")")){
         std::cerr << "Expect ) ." << std::endl;
-        exit(1);        
+        exit(1);
     }
+
     jt.advance();
 
     subroutine->body = compileSubroutineBody();
@@ -289,11 +281,9 @@ JC_Subroutine* CompilationEngine::compileSubroutine()
 JC_SubroutineBody* CompilationEngine::compileSubroutineBody()
 {
     // check "{"
-    if(jt.tokenType() != JackTokenizer::SYMBOL
-        || jt.symbol() != "{")
-    {
-        std::cerr << "Expect { ." << std::endl;
-        exit(1);        
+    if(!jt.expect_token(JackTokenizer::SYMBOL, "{")){
+        std::cerr << "Expect } ." << std::endl;
+        exit(1);
     }
     jt.advance();
 
@@ -314,9 +304,7 @@ JC_SubroutineBody* CompilationEngine::compileSubroutineBody()
     subroutinebody->statements = compileStatements();
 
     // check "}"
-    if(jt.tokenType() != JackTokenizer::SYMBOL
-        || jt.symbol() != "}")
-    {
+    if(!jt.expect_token(JackTokenizer::SYMBOL, "}")){
         std::cerr << "Expect } ." << std::endl;
         //exit(1);        
     }
@@ -328,9 +316,7 @@ JC_SubroutineBody* CompilationEngine::compileSubroutineBody()
 // 'var' type varName (',' varName) * ';'
 JC_VarDec* CompilationEngine::compileVarDec()
 {
-    if (jt.tokenType() != JackTokenizer::KEYWORD
-        || jt.keyword() != "var")
-    {
+    if(!jt.expect_token(JackTokenizer::KEYWORD, "var")){
         return nullptr;
     }
     jt.advance();
@@ -342,18 +328,14 @@ JC_VarDec* CompilationEngine::compileVarDec()
 
     JC_VarName* varname = vardec->varname;
 
-    while(jt.tokenType() == JackTokenizer::SYMBOL
-        && jt.symbol() == ",")
-    {
+    while(jt.expect_token(JackTokenizer::SYMBOL, ",")){
         jt.advance();
         varname->next = compileVarName();
         varname = varname->next;
     }
 
     // check ";"
-    if(jt.tokenType() != JackTokenizer::SYMBOL
-        || jt.symbol() != ";")
-    {
+    if(!jt.expect_token(JackTokenizer::SYMBOL, ";")){
         std::cerr << "Expect ; ." << std::endl;
         exit(1);        
     }
@@ -415,14 +397,10 @@ JC_Statement* CompilationEngine::compileLet()
     JC_Variant* var = new JC_Variant();
     var->varname = compileVarName();
 
-    if(jt.tokenType() == JackTokenizer::SYMBOL
-        && jt.symbol() == "[")
-    {
+    if(jt.expect_token(JackTokenizer::SYMBOL, "[")){
         var->exp = compileExpression();
 
-        if(jt.tokenType() != JackTokenizer::SYMBOL
-            || jt.symbol() == "]" )
-        {
+        if(!jt.expect_token(JackTokenizer::SYMBOL, "]")){
             std::cerr << "Expect ] ." << std::endl;
         }
         jt.advance();
@@ -430,9 +408,7 @@ JC_Statement* CompilationEngine::compileLet()
     let->lhs = var;
 
     // "="
-    if(jt.tokenType() != JackTokenizer::SYMBOL
-        || jt.symbol() != "=")
-    {
+    if(jt.expect_token(JackTokenizer::SYMBOL, "=")){
         std::cerr << "Expect = ." << std::endl;
     }
     jt.advance();
@@ -440,9 +416,7 @@ JC_Statement* CompilationEngine::compileLet()
     let->rhs = compileExpression();
 
     // ";"
-    if(jt.tokenType() != JackTokenizer::SYMBOL
-        || jt.symbol() != ";")
-    {
+    if(jt.expect_token(JackTokenizer::SYMBOL, ";")){
         std::cerr << "Expect ; ." << std::endl;
     }
     jt.advance();
@@ -456,8 +430,7 @@ JC_Expression* CompilationEngine::compileExpressionList()
     JC_Expression* cur = exp;
 
     while(cur){
-        if((jt.tokenType() != JackTokenizer::SYMBOL)
-            || (jt.symbol() != ",")){
+    if(!jt.expect_token(JackTokenizer::SYMBOL, ",")){
             break;
         }
 
@@ -492,24 +465,18 @@ JC_SubroutineCall* CompilationEngine::compileSubroutineCall()
     subcall->subroutine_name = compileSubroutineName();
 
     // "("
-    if(jt.tokenType() != JackTokenizer::SYMBOL
-        || jt.symbol() != "(")
-    {
+    if(!jt.expect_token(JackTokenizer::SYMBOL, "(")){
         std::cerr << "Expect = (" << std::endl;
     }
     jt.advance();
 
     // has expressio list?
-    if(jt.tokenType() != JackTokenizer::SYMBOL
-        || jt.symbol() != ")")
-    {
+    if(!jt.expect_token(JackTokenizer::SYMBOL, ")")){
         subcall->exp = compileExpressionList();
     }
 
     // ")"
-    if(jt.tokenType() != JackTokenizer::SYMBOL
-        || jt.symbol() != ")")
-    {
+    if(!jt.expect_token(JackTokenizer::SYMBOL, ")")){
         std::cerr << "Expect = )" << std::endl;
     }
     jt.advance();
@@ -527,9 +494,7 @@ JC_Statement* CompilationEngine::compileDo()
     DoStatement->subcall = compileSubroutineCall();
 
     // ";"
-    if(jt.tokenType() != JackTokenizer::SYMBOL
-        || jt.symbol() != ";")
-    {
+    if(!jt.expect_token(JackTokenizer::SYMBOL, ";")){
         std::cerr << "Expect ; ." << std::endl;
     }
     jt.advance();
@@ -544,9 +509,7 @@ JC_Statement* CompilationEngine::compileReturn()
     jt.advance();
 
     // ";"
-    if(jt.tokenType() != JackTokenizer::SYMBOL
-        || jt.symbol() != ";")
-    {
+    if(!jt.expect_token(JackTokenizer::SYMBOL, ";")){
         // next token is not ";".
         // there is expected having expression.
         ret->exp = compileExpression();
@@ -637,8 +600,7 @@ JC_Term* CompilationEngine::compileTerm()
         }
     } else if(jt.tokenType() == JackTokenizer::IDENTIFIER){
 
-        if((jt.next_tokenType() == JackTokenizer::SYMBOL)
-            && (jt.next_symbol() == "(")){
+        if(jt.expect_token(JackTokenizer::SYMBOL, "(")){
             // subroutine call
         } else {
             // array or variant
@@ -662,15 +624,11 @@ JC_Variant* CompilationEngine::compileVariant()
     var->varname = compileVarName();
 
     // is array?
-    if(jt.tokenType() == JackTokenizer::SYMBOL
-        && jt.symbol() == "[")
-    {
+    if(jt.expect_token(JackTokenizer::SYMBOL, "[")){
         jt.advance();
         var->exp = compileExpression();
 
-        if(jt.tokenType() == JackTokenizer::SYMBOL
-            && jt.symbol() == "]")
-        {
+        if(jt.expect_token(JackTokenizer::SYMBOL, "]")){
             jt.advance();
         } else {
             std::cerr << "[error] expected ']'." << std::endl;
