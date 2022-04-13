@@ -324,3 +324,24 @@ std::string JackTokenizer::next_identifier()
 
     return ret_identifier;
 }
+
+bool JackTokenizer::expect_token(TK_TYPE type, std::string str)
+{
+    if(type != tokens.front().type
+        || str != tokens.front().str)
+    {
+        return false;    
+    }
+
+    return true;
+}
+
+bool JackTokenizer::expect_token(TK_TYPE type)
+{
+    if(type != tokens.front().type)
+    {
+        return false;    
+    }
+    
+    return true;
+}

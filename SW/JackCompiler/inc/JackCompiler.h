@@ -60,6 +60,10 @@ class JackTokenizer
         int32_t next_intVal();
         std::string next_stringVal();
         std::string next_identifier();
+
+        bool expect_token(TK_TYPE type, std::string str);
+        bool expect_token(TK_TYPE type);
+
     private:
         typedef struct _Token
         {
