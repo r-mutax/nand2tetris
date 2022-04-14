@@ -285,10 +285,13 @@ void OutputProgram::printTerm(JC_Term* term)
             m_xml.printDataLine("integerConstant", std::to_string(term->integerVal));
             break;
         case STRING_CONST:
-            m_xml.printDataLine("stringConstant", std::to_string(term->integerVal));
+            m_xml.printDataLine("stringConstant", term->stringVal);
             break;
         case VARIANT:
             m_xml.printDataLine("identifier", term->var->varname->name);
+            break;
+        case KEYWORD_CONST:
+            m_xml.printDataLine("keyword", term->stringVal);
             break;
         default:
             break;
@@ -319,6 +322,7 @@ void OutputProgram::printExpressionList(JC_Expression* exp_list)
         while(cur){
             m_xml.printDataLine("symbol", ",");
             printExpression(cur);
+            cur = cur->next;
         }
     }
     m_xml.printDataTail("expressionList");

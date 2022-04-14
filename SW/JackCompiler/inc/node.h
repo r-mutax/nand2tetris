@@ -5,6 +5,9 @@
 
 // forward definition.
 class JC_Variant;
+class JC_SubroutineCall;
+class JC_Expression;
+
 
 enum JC_NodeType {
     JC_NO_TYPE = 0,
@@ -113,6 +116,8 @@ class JC_Term : public JC_Element
         JC_Operand* op;
         JC_Term*    next;
         JC_Variant*  var;
+        JC_SubroutineCall* subcall;
+        JC_Expression* exp;
 
         TermType    termtype;
         long        integerVal;

@@ -430,9 +430,10 @@ JC_Expression* CompilationEngine::compileExpressionList()
     JC_Expression* cur = exp;
 
     while(cur){
-    if(!jt.expect_token(JackTokenizer::SYMBOL, ",")){
+        if(!jt.expect_token(JackTokenizer::SYMBOL, ",")){
             break;
         }
+        jt.advance();
 
         cur->next = compileExpression();
         cur = cur->next;
@@ -584,9 +585,11 @@ JC_Term* CompilationEngine::compileTerm()
     {
         term->termtype = INTEGER_CONST;
         term->integerVal = jt.intVal();
+        jt.advance();
     } else if(jt.tokenType() == JackTokenizer::STRING_CONST) {
         term->termtype = STRING_CONST;
         term->stringVal = jt.stringVal();
+        jt.advance();
     } else if(jt.tokenType() == JackTokenizer::KEYWORD){
         if( (jt.keyword() == "true")
             || (jt.keyword() == "false")
@@ -594,6 +597,7 @@ JC_Term* CompilationEngine::compileTerm()
             || (jt.keyword() == "this")){
             term->termtype = KEYWORD_CONST;
             term->stringVal = jt.keyword();
+            jt.advance();
         } else {
             std::cerr << "error keyword." << std::endl;
             return nullptr;
@@ -602,11 +606,31 @@ JC_Term* CompilationEngine::compileTerm()
 
         if(jt.expect_token(JackTokenizer::SYMBOL, "(")){
             // subroutine call
+            term->termtype = SUBROUTINECALL;
+            term->subcall = compileSubroutineCall();
         } else {
             // array or variant
             term->termtype = VARIANT;
             term->var = compileVariant();
         }
+    } else if(jt.expect_token(JackTokenizer::SYMBOL, "(")){
+        jt.advance();
+
+        term->exp = compileExpression();
+
+        if(!jt.expect_token(JackTokenizer::SYMBOL, ")")){
+            delete term;
+            return nullptr;
+        }
+        jt.advance();
+    } else if(jt.expect_token(JackTokenizer::SYMBOL, "-")
+            || jt.expect_token(JackTokenizer::SYMBOL, "~")){
+        term->op = new JC_Operand();
+        term->op->op = jt.symbol();
+
+        jt.advance();
+        
+        term->next = compileTerm();
     } else {
         delete term;
         term = nullptr;
