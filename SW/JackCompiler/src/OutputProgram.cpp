@@ -179,29 +179,6 @@ void OutputProgram::printVarDec(JC_VarDec* vardec)
 void OutputProgram::printMultipleStatements(JC_MultipleStatement* multi_statement)
 {
     printStatements(multi_statement->statement_body);
- 
-    // m_xml.printDataHead("statements");
-
-    // JC_Statement* cur = multi_statement->statement_body;
-    // while(cur){
-    //     switch(cur->type){
-    //         case LET_STATEMENT:
-    //             printLetStatement((JC_LetStatement*)cur);
-    //             break;
-    //         case DO_STATEMENT:
-    //             printDoStatement((JC_DoStatement*)cur);
-    //             break;
-    //         case RETURN_STATEMENT:
-    //             printReturnStatement((JC_ReturnStatement*)cur);
-    //             break;
-    //         case IF_STATEMENT:
-    //             printIfStatement((JC_IfStatement*)cur);
-    //             break;
-    //     }
-    //     cur = cur->next;
-    // }
-
-    // m_xml.printDataTail("statements");
 }
 
 void OutputProgram::printStatements(JC_Statement* statements)
@@ -249,7 +226,7 @@ void OutputProgram::printLetStatement(JC_LetStatement* letstatement)
     if(var->exp){
         m_xml.printDataLine("symbol", "[");
 
-        // printExpression(var->exp);
+        printExpression(var->exp);
 
         m_xml.printDataLine("symbol", "]");
     }
@@ -371,6 +348,9 @@ void OutputProgram::printTerm(JC_Term* term)
         case EXPRESSION:
             printExpression(term->exp);
             break;
+        case SUBROUTINECALL:
+            printSubroutineCall(term->subcall);
+            break;
         case UNARYOP_TERM:
             break;
     }
@@ -383,7 +363,14 @@ void OutputProgram::printExpression(JC_Expression* expression)
 {
     m_xml.printDataHead("expression");
 
-    printTerm(expression->term);
+    JC_Term* term = expression->term;
+
+    printTerm(term);
+    while(term->op){
+        m_xml.printDataLine("symbol", term->op->op);
+        term = term->next;
+        printTerm(term);
+    }
 
     m_xml.printDataTail("expression");
 }
@@ -415,4 +402,18 @@ void OutputProgram::printVariant(JC_Variant* var)
         printExpression(var->exp);
         m_xml.printDataLine("symbol", "]");
     }   
+}
+
+void OutputProgram::printSubroutineCall(JC_SubroutineCall* subcall)
+{
+    if(subcall->classname != ""){
+        m_xml.printDataLine("identifier", subcall->classname);
+        m_xml.printDataLine("symbol", ".");
+    }
+
+    m_xml.printDataLine("identifier", subcall->subroutine_name->name);
+    m_xml.printDataLine("symbol", "(");
+    printExpressionList(subcall->exp);
+    m_xml.printDataLine("symbol", ")");
+
 }

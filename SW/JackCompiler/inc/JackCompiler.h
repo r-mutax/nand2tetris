@@ -118,6 +118,7 @@ class OutputProgram
         void printExpressionList(JC_Expression* exp_list);
         void printTerm(JC_Term* term);
         void printVariant(JC_Variant* var);
+        void printSubroutineCall(JC_SubroutineCall* subcall);
     public:
         OutputProgram(){};
         void SetFileName(std::string path);

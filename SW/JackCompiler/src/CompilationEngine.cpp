@@ -408,6 +408,7 @@ JC_Statement* CompilationEngine::compileLet()
     var->varname = compileVarName();
 
     if(jt.expect_token(JackTokenizer::SYMBOL, "[")){
+        jt.advance();
         var->exp = compileExpression();
 
         if(!jt.expect_token(JackTokenizer::SYMBOL, "]")){
@@ -418,7 +419,7 @@ JC_Statement* CompilationEngine::compileLet()
     let->lhs = var;
 
     // "="
-    if(jt.expect_token(JackTokenizer::SYMBOL, "=")){
+    if(!jt.expect_token(JackTokenizer::SYMBOL, "=")){
         std::cerr << "Expect = ." << std::endl;
     }
     jt.advance();
@@ -426,7 +427,7 @@ JC_Statement* CompilationEngine::compileLet()
     let->rhs = compileExpression();
 
     // ";"
-    if(jt.expect_token(JackTokenizer::SYMBOL, ";")){
+    if(!jt.expect_token(JackTokenizer::SYMBOL, ";")){
         std::cerr << "Expect ; ." << std::endl;
     }
     jt.advance();
@@ -602,7 +603,7 @@ JC_Statement* CompilationEngine::compileWhile()
     whilestatement->while_body = compileMultiStatement();
     CHCEK_ERROR(JackTokenizer::SYMBOL, "}");
     jt.advance();
-    
+
     return whilestatement;
 }
 
@@ -625,6 +626,7 @@ JC_Operand* CompilationEngine::compileOp()
 
             JC_Operand* ope = new JC_Operand();
             ope->op = jt.symbol();
+            jt.advance();
             return ope;
     }
 
@@ -686,17 +688,6 @@ JC_Term* CompilationEngine::compileTerm()
             std::cerr << "error keyword." << std::endl;
             return nullptr;
         }
-    } else if(jt.tokenType() == JackTokenizer::IDENTIFIER){
-
-        if(jt.expect_token(JackTokenizer::SYMBOL, "(")){
-            // subroutine call
-            term->termtype = SUBROUTINECALL;
-            term->subcall = compileSubroutineCall();
-        } else {
-            // array or variant
-            term->termtype = VARIANT;
-            term->var = compileVariant();
-        }
     } else if(jt.expect_token(JackTokenizer::SYMBOL, "(")){
         jt.advance();
 
@@ -717,6 +708,20 @@ JC_Term* CompilationEngine::compileTerm()
         jt.advance();
         
         term->next = compileTerm();
+    } else if(jt.tokenType() == JackTokenizer::IDENTIFIER){
+
+        if(jt.next_tokenType() == JackTokenizer::SYMBOL
+            && (jt.next_symbol() == "." || (jt.next_symbol() == "(")))
+        {
+            // identifier '.' identifier '(' expressions? ')'
+            // | identifier '(' expressions? ')'
+            term->termtype = SUBROUTINECALL;
+            term->subcall = compileSubroutineCall();
+        } else {
+            // array or variant
+            term->termtype = VARIANT;
+            term->var = compileVariant();
+        }
     } else {
         delete term;
         term = nullptr;
