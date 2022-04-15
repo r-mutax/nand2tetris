@@ -178,28 +178,30 @@ void OutputProgram::printVarDec(JC_VarDec* vardec)
 
 void OutputProgram::printMultipleStatements(JC_MultipleStatement* multi_statement)
 {
-    m_xml.printDataHead("statements");
+    printStatements(multi_statement->statement_body);
+ 
+    // m_xml.printDataHead("statements");
 
-    JC_Statement* cur = multi_statement->statement_body;
-    while(cur){
-        switch(cur->type){
-            case LET_STATEMENT:
-                printLetStatement((JC_LetStatement*)cur);
-                break;
-            case DO_STATEMENT:
-                printDoStatement((JC_DoStatement*)cur);
-                break;
-            case RETURN_STATEMENT:
-                printReturnStatement((JC_ReturnStatement*)cur);
-                break;
-            case IF_STATEMENT:
-                printIfStatement((JC_IfStatement*)cur);
-                break;
-        }
-        cur = cur->next;
-    }
+    // JC_Statement* cur = multi_statement->statement_body;
+    // while(cur){
+    //     switch(cur->type){
+    //         case LET_STATEMENT:
+    //             printLetStatement((JC_LetStatement*)cur);
+    //             break;
+    //         case DO_STATEMENT:
+    //             printDoStatement((JC_DoStatement*)cur);
+    //             break;
+    //         case RETURN_STATEMENT:
+    //             printReturnStatement((JC_ReturnStatement*)cur);
+    //             break;
+    //         case IF_STATEMENT:
+    //             printIfStatement((JC_IfStatement*)cur);
+    //             break;
+    //     }
+    //     cur = cur->next;
+    // }
 
-    m_xml.printDataTail("statements");
+    // m_xml.printDataTail("statements");
 }
 
 void OutputProgram::printStatements(JC_Statement* statements)
@@ -220,6 +222,9 @@ void OutputProgram::printStatements(JC_Statement* statements)
                 break;
             case IF_STATEMENT:
                 printIfStatement((JC_IfStatement*)cur);
+                break;
+            case WHILE_STATEMENT:
+                printWhileStatement((JC_WhileStatement*)cur);
                 break;
         }
         cur = cur->next;
@@ -323,6 +328,23 @@ void OutputProgram::printIfStatement(JC_IfStatement* ifstatement)
     }
 
     m_xml.printDataTail("ifStatement");
+}
+
+void OutputProgram::printWhileStatement(JC_WhileStatement* whilestatement)
+{
+    m_xml.printDataHead("whileStatement");
+
+    m_xml.printDataLine("keyword", "while");
+
+    m_xml.printDataLine("symbol", "(");
+    printExpression(whilestatement->cond);
+    m_xml.printDataLine("symbol", ")");
+
+    m_xml.printDataLine("symbol", "{");
+    printMultipleStatements(whilestatement->while_body);
+    m_xml.printDataLine("symbol", "}");
+
+    m_xml.printDataTail("whileStatement");
 }
 
 // integerConstant | stringConstant

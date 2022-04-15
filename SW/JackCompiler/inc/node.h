@@ -223,11 +223,24 @@ class JC_IfStatement : public JC_Statement
             cond = nullptr;
             true_statements = nullptr;
             false_statements = nullptr;
-        }
+        };
         JC_Expression* cond;
 
         JC_MultipleStatement*    true_statements;
         JC_MultipleStatement*    false_statements;
+};
+
+class JC_WhileStatement : public JC_Statement
+{
+    public:
+        JC_WhileStatement(){
+            type = WHILE_STATEMENT;
+            cond = nullptr;
+            while_body = nullptr;
+        };
+        JC_Expression* cond;
+        
+        JC_MultipleStatement* while_body;
 };
 
 class JC_SubroutineBody : public JC_Element

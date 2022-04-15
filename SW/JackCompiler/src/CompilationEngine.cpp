@@ -1,5 +1,7 @@
 #include "JackCompiler.h"
 
+#define CHCEK_ERROR(a, b)   do{if(!jt.expect_token(a, b)){ std::cerr << "Expect " << b << "." << std::endl;}}while(0)
+
 CompilationEngine::CompilationEngine(const std::string path)
 {
     jt.Open(path);
@@ -381,6 +383,10 @@ JC_Statement* CompilationEngine::compileSingleStatement()
     {
         retval = compileIf();
     }
+    else if(jt.keyword() == "while")
+    {
+        retval = compileWhile();
+    }
     else
     {
         std::cerr << "errorStatement." << std::endl;
@@ -535,8 +541,6 @@ JC_MultipleStatement* CompilationEngine::compileMultiStatement()
     return multi;
 }
 
-#define CHCEK_ERROR(a, b)   do{if(!jt.expect_token(a, b)){ std::cerr << "Expect " << b << "." << std::endl;}}while(0)
-
 // 'if' '(' expression ')'
 // '{' statements '}'
 // 'else' '{' statements '}'
@@ -576,6 +580,30 @@ JC_Statement* CompilationEngine::compileIf()
     }
 
     return if_statement;
+}
+
+JC_Statement* CompilationEngine::compileWhile()
+{
+    if(!jt.expect_token(JackTokenizer::KEYWORD, "while")){
+        return nullptr;
+    }
+    jt.advance();
+
+    JC_WhileStatement* whilestatement = new JC_WhileStatement();
+
+    CHCEK_ERROR(JackTokenizer::SYMBOL, "(");
+    jt.advance();
+    whilestatement->cond = compileExpression();
+    CHCEK_ERROR(JackTokenizer::SYMBOL, ")");
+    jt.advance();
+
+    CHCEK_ERROR(JackTokenizer::SYMBOL, "{");
+    jt.advance();
+    whilestatement->while_body = compileMultiStatement();
+    CHCEK_ERROR(JackTokenizer::SYMBOL, "}");
+    jt.advance();
+    
+    return whilestatement;
 }
 
 JC_Operand* CompilationEngine::compileOp()
