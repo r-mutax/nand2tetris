@@ -172,6 +172,15 @@ class JC_Statement : public JC_Element
     JC_Statement* next;
 };
 
+class JC_MultipleStatement : public JC_Element
+{
+    public:
+        JC_MultipleStatement(){
+            statement_body = nullptr;
+        };
+        JC_Statement* statement_body;
+};
+
 class JC_LetStatement : public JC_Statement
 {
     public:
@@ -204,6 +213,21 @@ class JC_ReturnStatement : public JC_Statement
             exp = nullptr;
         }
         JC_Expression* exp;
+};
+
+class JC_IfStatement : public JC_Statement
+{
+    public:
+        JC_IfStatement(){
+            type = IF_STATEMENT;
+            cond = nullptr;
+            true_statements = nullptr;
+            false_statements = nullptr;
+        }
+        JC_Expression* cond;
+
+        JC_MultipleStatement*    true_statements;
+        JC_MultipleStatement*    false_statements;
 };
 
 class JC_SubroutineBody : public JC_Element

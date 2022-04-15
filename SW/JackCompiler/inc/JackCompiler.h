@@ -107,13 +107,16 @@ class OutputProgram
         void printParameterList(JC_Parameter* param);
         void printSubroutineBody(JC_SubroutineBody* body);
         void printVarDec(JC_VarDec* vardec);
+        void printMultipleStatements(JC_MultipleStatement* multi_statement);
         void printStatements(JC_Statement* statements);
         void printLetStatement(JC_LetStatement* letstatements);
         void printDoStatement(JC_DoStatement* dostatemene);
-        void printReturnStatejeht(JC_ReturnStatement* returnstatement);
+        void printReturnStatement(JC_ReturnStatement* returnstatement);
+        void printIfStatement(JC_IfStatement* ifstatement);
         void printExpression(JC_Expression* expression);
         void printExpressionList(JC_Expression* exp_list);
         void printTerm(JC_Term* term);
+        void printVariant(JC_Variant* var);
     public:
         OutputProgram(){};
         void SetFileName(std::string path);
@@ -142,11 +145,13 @@ class CompilationEngine
         JC_Statement* compileLet();
         JC_Statement* compileDo();
         JC_Statement* compileReturn();
+        JC_Statement* compileIf();
         JC_Expression* compileExpression();
         JC_Term* compileTerm();
         JC_Variant* compileVariant();
         JC_Operand* compileOp();
         JC_Expression* compileExpressionList();
+        JC_MultipleStatement* compileMultiStatement();
     public:
         CompilationEngine(const std::string path);
         ~CompilationEngine(void);

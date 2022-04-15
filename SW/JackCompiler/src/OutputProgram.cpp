@@ -176,6 +176,32 @@ void OutputProgram::printVarDec(JC_VarDec* vardec)
     m_xml.printDataTail("varDec");
 }
 
+void OutputProgram::printMultipleStatements(JC_MultipleStatement* multi_statement)
+{
+    m_xml.printDataHead("statements");
+
+    JC_Statement* cur = multi_statement->statement_body;
+    while(cur){
+        switch(cur->type){
+            case LET_STATEMENT:
+                printLetStatement((JC_LetStatement*)cur);
+                break;
+            case DO_STATEMENT:
+                printDoStatement((JC_DoStatement*)cur);
+                break;
+            case RETURN_STATEMENT:
+                printReturnStatement((JC_ReturnStatement*)cur);
+                break;
+            case IF_STATEMENT:
+                printIfStatement((JC_IfStatement*)cur);
+                break;
+        }
+        cur = cur->next;
+    }
+
+    m_xml.printDataTail("statements");
+}
+
 void OutputProgram::printStatements(JC_Statement* statements)
 {
     m_xml.printDataHead("statements");
@@ -190,7 +216,10 @@ void OutputProgram::printStatements(JC_Statement* statements)
                 printDoStatement((JC_DoStatement*)cur);
                 break;
             case RETURN_STATEMENT:
-                printReturnStatejeht((JC_ReturnStatement*)cur);
+                printReturnStatement((JC_ReturnStatement*)cur);
+                break;
+            case IF_STATEMENT:
+                printIfStatement((JC_IfStatement*)cur);
                 break;
         }
         cur = cur->next;
@@ -256,7 +285,7 @@ void OutputProgram::printDoStatement(JC_DoStatement* dostatement)
     m_xml.printDataTail("doStatement");
 }
 
-void OutputProgram::printReturnStatejeht(JC_ReturnStatement* returnstatement)
+void OutputProgram::printReturnStatement(JC_ReturnStatement* returnstatement)
 {
     m_xml.printDataHead("returnStatement");
 
@@ -271,6 +300,30 @@ void OutputProgram::printReturnStatejeht(JC_ReturnStatement* returnstatement)
     m_xml.printDataTail("returnStatement");
 }
 
+void OutputProgram::printIfStatement(JC_IfStatement* ifstatement)
+{
+    m_xml.printDataHead("ifStatement");
+
+    m_xml.printDataLine("keyword", "if");
+    m_xml.printDataLine("symbol", "(");
+
+    printExpression(ifstatement->cond);
+    m_xml.printDataLine("symbol", ")");
+
+    m_xml.printDataLine("symbol", "{");
+    printMultipleStatements(ifstatement->true_statements);
+    m_xml.printDataLine("symbol", "}");
+
+    if(ifstatement->false_statements){
+        m_xml.printDataLine("keyword", "else");
+        
+        m_xml.printDataLine("symbol", "{");
+       printMultipleStatements(ifstatement->false_statements);
+        m_xml.printDataLine("symbol", "}");
+    }
+
+    m_xml.printDataTail("ifStatement");
+}
 
 // integerConstant | stringConstant
 // | keywordConstant | varName | varName '[' expression ']'
@@ -288,12 +341,15 @@ void OutputProgram::printTerm(JC_Term* term)
             m_xml.printDataLine("stringConstant", term->stringVal);
             break;
         case VARIANT:
-            m_xml.printDataLine("identifier", term->var->varname->name);
+            printVariant(term->var);
             break;
         case KEYWORD_CONST:
             m_xml.printDataLine("keyword", term->stringVal);
             break;
-        default:
+        case EXPRESSION:
+            printExpression(term->exp);
+            break;
+        case UNARYOP_TERM:
             break;
     }
 
@@ -326,4 +382,15 @@ void OutputProgram::printExpressionList(JC_Expression* exp_list)
         }
     }
     m_xml.printDataTail("expressionList");
+}
+
+void OutputProgram::printVariant(JC_Variant* var)
+{
+    m_xml.printDataLine("identifier", var->varname->name);
+
+    if(var->exp){
+        m_xml.printDataLine("symbol", "[");
+        printExpression(var->exp);
+        m_xml.printDataLine("symbol", "]");
+    }   
 }

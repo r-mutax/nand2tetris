@@ -377,6 +377,10 @@ JC_Statement* CompilationEngine::compileSingleStatement()
     {
         retval = compileReturn();
     }
+    else if(jt.keyword() == "if")
+    {
+        retval = compileIf();
+    }
     else
     {
         std::cerr << "errorStatement." << std::endl;
@@ -522,6 +526,58 @@ JC_Statement* CompilationEngine::compileReturn()
     return ret;
 }
 
+
+JC_MultipleStatement* CompilationEngine::compileMultiStatement()
+{
+    JC_MultipleStatement* multi = new JC_MultipleStatement();
+    multi->statement_body = compileStatements();
+
+    return multi;
+}
+
+#define CHCEK_ERROR(a, b)   do{if(!jt.expect_token(a, b)){ std::cerr << "Expect " << b << "." << std::endl;}}while(0)
+
+// 'if' '(' expression ')'
+// '{' statements '}'
+// 'else' '{' statements '}'
+JC_Statement* CompilationEngine::compileIf()
+{
+    JC_IfStatement* if_statement = new JC_IfStatement();
+
+    // skip "if"
+    jt.advance();
+
+    if(!jt.expect_token(JackTokenizer::SYMBOL, "(")) {
+        std::cerr << "Expect ( ." << std::endl;
+    }
+    jt.advance();
+
+    if_statement->cond = compileExpression();
+    CHCEK_ERROR(JackTokenizer::SYMBOL, ")");
+    jt.advance();
+
+    CHCEK_ERROR(JackTokenizer::SYMBOL, "{");
+    jt.advance();
+
+    if_statement->true_statements = compileMultiStatement();
+    CHCEK_ERROR(JackTokenizer::SYMBOL, "}");
+    jt.advance();
+
+    if(jt.expect_token(JackTokenizer::KEYWORD, "else"))
+    {
+        jt.advance();
+
+        CHCEK_ERROR(JackTokenizer::SYMBOL, "{");
+        jt.advance();
+
+        if_statement->false_statements = compileMultiStatement();
+        CHCEK_ERROR(JackTokenizer::SYMBOL, "}");
+        jt.advance();
+    }
+
+    return if_statement;
+}
+
 JC_Operand* CompilationEngine::compileOp()
 {
     if(jt.tokenType() != JackTokenizer::SYMBOL)
@@ -617,6 +673,7 @@ JC_Term* CompilationEngine::compileTerm()
         jt.advance();
 
         term->exp = compileExpression();
+        term->termtype = EXPRESSION;
 
         if(!jt.expect_token(JackTokenizer::SYMBOL, ")")){
             delete term;
@@ -627,6 +684,7 @@ JC_Term* CompilationEngine::compileTerm()
             || jt.expect_token(JackTokenizer::SYMBOL, "~")){
         term->op = new JC_Operand();
         term->op->op = jt.symbol();
+        term->termtype = UNARYOP_TERM;
 
         jt.advance();
         
