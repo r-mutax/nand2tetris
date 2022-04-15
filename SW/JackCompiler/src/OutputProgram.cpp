@@ -346,7 +346,9 @@ void OutputProgram::printTerm(JC_Term* term)
             m_xml.printDataLine("keyword", term->stringVal);
             break;
         case EXPRESSION:
+            m_xml.printDataLine("symbol", "(");
             printExpression(term->exp);
+            m_xml.printDataLine("symbol", ")");
             break;
         case SUBROUTINECALL:
             printSubroutineCall(term->subcall);
