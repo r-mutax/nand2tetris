@@ -701,8 +701,8 @@ JC_Term* CompilationEngine::compileTerm()
         jt.advance();
     } else if(jt.expect_token(JackTokenizer::SYMBOL, "-")
             || jt.expect_token(JackTokenizer::SYMBOL, "~")){
-        term->op = new JC_Operand();
-        term->op->op = jt.symbol();
+        term->unary_op = new JC_Operand();
+        term->unary_op->op = jt.symbol();
         term->termtype = UNARYOP_TERM;
 
         jt.advance();

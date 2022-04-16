@@ -112,7 +112,9 @@ class JC_Term : public JC_Element
         JC_Term(){
             op = nullptr;
             next = nullptr;
+            unary_op = nullptr;
         };
+        JC_Operand* unary_op;
         JC_Operand* op;
         JC_Term*    next;
         JC_Variant*  var;

@@ -354,6 +354,8 @@ void OutputProgram::printTerm(JC_Term* term)
             printSubroutineCall(term->subcall);
             break;
         case UNARYOP_TERM:
+            m_xml.printDataLine("symbol", term->unary_op->op);
+            printTerm(term->next);
             break;
     }
 
