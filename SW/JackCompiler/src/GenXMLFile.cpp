@@ -16,18 +16,21 @@ void GenXMLFile::printDataHead(std::string node_name)
 {
     for(int i = 0; i < lebel; i++)
     {
-        m_ofs << "\t";
+        m_ofs << "  ";
     }
 
     m_ofs << "<" << node_name << ">" << std::endl;
+
+    lebel++;
 }
 
 // print xml node tail with lebel.
 void GenXMLFile::printDataTail(std::string node_name)
 {
+    lebel--;
     for(int i = 0; i < lebel; i++)
     {
-        m_ofs << "\t";
+        m_ofs << "  ";
     }
 
     m_ofs << "</" << node_name << ">" << std::endl;
@@ -42,7 +45,7 @@ void GenXMLFile::printDataLine(std::string node_name, std::string value)
 
     for(int i = 0; i < lebel; i++)
     {
-        m_ofs << "\t";
+        m_ofs << "  ";
     }
     m_ofs << "<" << node_name << "> ";
     m_ofs << value;
