@@ -3,12 +3,6 @@
 
 #include <string>
 
-// forward definition.
-class JC_Variant;
-class JC_SubroutineCall;
-class JC_Expression;
-
-
 class Base {
 
 };
@@ -36,17 +30,6 @@ class exB : public B {
         };
         A* m_ex_a;
 };
-
-
-
-
-
-
-
-
-
-
-
 
 enum JC_NodeType {
     JC_NO_TYPE = 0,
