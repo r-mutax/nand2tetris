@@ -340,7 +340,7 @@ void OutputProgram::printTerm(JC_Term* term)
             m_xml.printDataLine("stringConstant", term->stringVal);
             break;
         case VARIANT:
-            printVariant(term->var);
+            printVariant((JC_Variant*)(term->var));
             break;
         case KEYWORD_CONST:
             m_xml.printDataLine("keyword", term->stringVal);
@@ -355,7 +355,7 @@ void OutputProgram::printTerm(JC_Term* term)
             break;
         case UNARYOP_TERM:
             m_xml.printDataLine("symbol", term->unary_op->op);
-            printTerm(term->next);
+            printTerm((JC_Term*)(term->next));
             break;
     }
 
@@ -367,12 +367,12 @@ void OutputProgram::printExpression(JC_Expression* expression)
 {
     m_xml.printDataHead("expression");
 
-    JC_Term* term = expression->term;
+    JC_Term* term = (JC_Term*)expression->term;
 
     printTerm(term);
     while(term->op){
         m_xml.printDataLine("symbol", term->op->op);
-        term = term->next;
+        term = (JC_Term*)(term->next);
         printTerm(term);
     }
 

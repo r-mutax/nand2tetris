@@ -640,7 +640,7 @@ JC_Expression* CompilationEngine::compileExpression()
     
     exp->term = compileTerm();
 
-    JC_Term* cur = exp->term;
+    JC_Term* cur = (JC_Term*)(exp->term);
 
     while(cur){
         if(jt.tokenType() != JackTokenizer::SYMBOL)
@@ -655,7 +655,7 @@ JC_Expression* CompilationEngine::compileExpression()
         }
 
         cur->next = compileTerm();
-        cur = cur->next;
+        cur = (JC_Term*)(cur->next);
     }
 
     return exp;

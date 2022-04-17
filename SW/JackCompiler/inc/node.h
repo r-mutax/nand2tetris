@@ -9,6 +9,45 @@ class JC_SubroutineCall;
 class JC_Expression;
 
 
+class Base {
+
+};
+
+class A : public Base {
+    public:
+        A();
+};
+
+class B : public Base {
+    public:
+        B();
+};
+
+class exA : public A{
+    public:
+        exA(){};
+};
+
+class exB : public B {
+    public:
+
+        exB(){
+            m_ex_a = new exA();
+        };
+        A* m_ex_a;
+};
+
+
+
+
+
+
+
+
+
+
+
+
 enum JC_NodeType {
     JC_NO_TYPE = 0,
     JC_PROGRAM,
@@ -41,6 +80,9 @@ class JC_VarName : public JC_Element
             type = JC_VARNAME;
             next = nullptr;
         };
+        ~JC_VarName(){
+            if(next) delete next;
+        };
         std::string     name;
         JC_VarName*     next;
 };
@@ -61,7 +103,12 @@ class JC_Parameter : JC_Element
             type = nullptr;
             varname = nullptr;
             next = nullptr;
-        }
+        };
+        ~JC_Parameter(){
+            if(type) delete type;
+            if(varname) delete varname;
+            if(next) delete next;
+        };
         JC_Type*        type;
         JC_VarName*     varname;
         JC_Parameter*   next;
@@ -74,7 +121,12 @@ class JC_VarDec : public JC_Element
             next = nullptr;
             type = nullptr;
             varname = nullptr;
-        }   
+        };
+        ~JC_VarDec(){
+            if(next) delete next;
+            if(type) delete type;
+            if(varname) delete varname;
+        };
         JC_VarDec* next;
         JC_Type* type;
         JC_VarName* varname;
@@ -106,24 +158,13 @@ enum TermType {
     , UNARYOP_TERM
 };
 
-class JC_Term : public JC_Element
+class JC_VariantBase : public JC_Element
+{
+};
+
+class JC_TermBase : public JC_Element
 {
     public:
-        JC_Term(){
-            op = nullptr;
-            next = nullptr;
-            unary_op = nullptr;
-        };
-        JC_Operand* unary_op;
-        JC_Operand* op;
-        JC_Term*    next;
-        JC_Variant*  var;
-        JC_SubroutineCall* subcall;
-        JC_Expression* exp;
-
-        TermType    termtype;
-        long        integerVal;
-        std::string stringVal;
 };
 
 class JC_Expression : public JC_Element
@@ -133,20 +174,12 @@ class JC_Expression : public JC_Element
             term = nullptr;
             next = nullptr;
         };
-        JC_Term* term;
-        JC_Expression* next;
-};
-
-class JC_Variant : public JC_Element
-{
-    public:
-        JC_Variant()
-        {
-            varname = nullptr;
-            exp = nullptr;
+        ~JC_Expression(){
+            if(term) delete term;
+            if(next) delete next;
         }
-        JC_VarName* varname;
-        JC_Expression* exp;
+        JC_TermBase* term;
+        JC_Expression* next;
 };
 
 class JC_SubroutineCall : public JC_Element
@@ -157,11 +190,61 @@ class JC_SubroutineCall : public JC_Element
             exp = nullptr;
             classname = "";
         };
+        ~JC_SubroutineCall(){
+            if(subroutine_name) delete subroutine_name;
+            if(exp) delete exp;
+        };
 
         JC_SubroutineName* subroutine_name;
         std::string classname;
         JC_Expression* exp;
 };
+
+class JC_Term : public JC_TermBase
+{
+    public:
+        JC_Term(){
+            op = nullptr;
+            next = nullptr;
+            unary_op = nullptr;
+        };
+        ~JC_Term(){
+            if(unary_op) delete unary_op;
+            if(op) delete op;
+            if(next) delete next;
+            if(var) delete var;
+            if(subcall) delete subcall;
+            if(exp) delete exp;
+        };
+        JC_Operand* unary_op;
+        JC_Operand* op;
+        JC_TermBase*    next;
+        JC_VariantBase*  var;
+        JC_SubroutineCall* subcall;
+        JC_Expression* exp;
+
+        TermType    termtype;
+        long        integerVal;
+        std::string stringVal;
+};
+
+
+class JC_Variant : public JC_VariantBase
+{
+    public:
+        JC_Variant()
+        {
+            varname = nullptr;
+            exp = nullptr;
+        };
+        ~JC_Variant(){
+            if(varname) delete varname;
+            if(exp) delete exp;
+        };
+        JC_VarName* varname;
+        JC_Expression* exp;
+};
+
 
 class JC_Statement : public JC_Element
 {
@@ -169,6 +252,9 @@ class JC_Statement : public JC_Element
     JC_Statement(){
         type = UNKNOWN_STATEMENT;
         next = nullptr;
+    };
+    ~JC_Statement(){
+        if(next) delete next;
     };
     StatementType   type;
     JC_Statement* next;
@@ -179,6 +265,9 @@ class JC_MultipleStatement : public JC_Element
     public:
         JC_MultipleStatement(){
             statement_body = nullptr;
+        };
+        ~JC_MultipleStatement(){
+            if(statement_body) delete statement_body;
         };
         JC_Statement* statement_body;
 };
@@ -192,6 +281,11 @@ class JC_LetStatement : public JC_Statement
             rhs = nullptr;
             next = nullptr;
         };
+        ~JC_LetStatement(){
+            if(lhs) delete lhs;
+            if(rhs) delete rhs;
+            if(next) delete next;
+        }
         JC_Variant* lhs;
         JC_Expression* rhs;
 
@@ -203,7 +297,10 @@ class JC_DoStatement : public JC_Statement
         JC_DoStatement(){
             type = DO_STATEMENT;
             subcall = nullptr;
-        }
+        };
+        ~JC_DoStatement(){
+            if(subcall) delete subcall;
+        };
         JC_SubroutineCall* subcall;
 };
 
@@ -213,7 +310,11 @@ class JC_ReturnStatement : public JC_Statement
         JC_ReturnStatement(){
             type = RETURN_STATEMENT;
             exp = nullptr;
-        }
+        };
+        ~JC_ReturnStatement(){
+            if(exp) delete exp;
+        };
+
         JC_Expression* exp;
 };
 
@@ -225,6 +326,11 @@ class JC_IfStatement : public JC_Statement
             cond = nullptr;
             true_statements = nullptr;
             false_statements = nullptr;
+        };
+        ~JC_IfStatement(){
+            if(cond) delete cond;
+            if(true_statements) delete true_statements;
+            if(false_statements) delete false_statements;
         };
         JC_Expression* cond;
 
@@ -240,6 +346,10 @@ class JC_WhileStatement : public JC_Statement
             cond = nullptr;
             while_body = nullptr;
         };
+        ~JC_WhileStatement(){
+            if(cond) delete cond;
+            if(while_body) delete while_body;
+        };
         JC_Expression* cond;
         
         JC_MultipleStatement* while_body;
@@ -250,6 +360,11 @@ class JC_SubroutineBody : public JC_Element
     public:
         JC_SubroutineBody(){
             vardec = nullptr;
+            statements = nullptr;
+        };
+        ~JC_SubroutineBody(){
+            if(vardec) delete vardec;
+            if(statements) delete statements;
         };
         JC_VarDec* vardec;
         JC_Statement* statements;
@@ -258,6 +373,22 @@ class JC_SubroutineBody : public JC_Element
 class JC_Subroutine : public JC_Element
 {
     public:
+        JC_Subroutine(){
+            type = nullptr;
+            name = nullptr;
+            body = nullptr;
+            parameterlist = nullptr;
+            next = nullptr;
+        };
+
+        ~JC_Subroutine(){
+            if(type) delete type;
+            if(name) delete name;
+            if(body) delete body;
+            if(parameterlist) delete parameterlist;
+            if(next) delete next;
+        };
+
         std::string         subroutinetype;
         JC_Type*            type;
         JC_SubroutineName*  name;
@@ -275,6 +406,11 @@ class JC_ClassVarDec : public JC_Element
             type = nullptr;
             VarName = nullptr;
         };
+        ~JC_ClassVarDec(){
+            if(next) delete next;
+            if(type) delete type;
+            if(VarName) delete VarName;
+        };
         std::string         vartype;
         JC_ClassVarDec*     next;
         JC_Type*            type;
@@ -284,6 +420,14 @@ class JC_ClassVarDec : public JC_Element
 class JC_Class : public JC_Element
 {
     public:
+        JC_Class(){
+            classVarDecs = nullptr;
+            classSubroutinDecs = nullptr;
+        };
+        ~JC_Class(){
+            if(classVarDecs) delete classVarDecs;
+            if(classSubroutinDecs) delete classSubroutinDecs;
+        };
         std::string classname;
         JC_ClassVarDec* classVarDecs;
         JC_Subroutine* classSubroutinDecs;
@@ -294,6 +438,10 @@ class JC_Program : public JC_Element
     public:
         JC_Program(){
             type = JC_PROGRAM;
+            cls = nullptr;
+        };
+        ~JC_Program(){
+            if(cls) delete cls;
         }
         JC_Class* cls;
 };
