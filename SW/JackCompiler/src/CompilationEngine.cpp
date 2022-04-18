@@ -51,6 +51,7 @@ JC_Class* CompilationEngine::compileClass()
         cvd_cur = cvd_cur->next;
     }
     cls->classVarDecs = cvd_head.next;
+    cvd_head.next = nullptr;
 
     // check subroutineDec
     JC_Subroutine subr_head;
@@ -60,6 +61,7 @@ JC_Class* CompilationEngine::compileClass()
         subr_cur = subr_cur->next;
     }
     cls->classSubroutinDecs = subr_head.next;
+    subr_head.next = nullptr;
 
     // check "}"
     if(jt.expect_token(JackTokenizer::SYMBOL, "}")){
@@ -220,8 +222,10 @@ JC_Parameter* CompilationEngine::compileParameterList()
         }
         cur = cur->next;
     }
+    JC_Parameter* ret = head.next;
+    head.next = nullptr;
 
-    return head.next;
+    return ret;
 }
 
 // ('constructor' | 'function' | 'method')
@@ -300,6 +304,7 @@ JC_SubroutineBody* CompilationEngine::compileSubroutineBody()
         cur_vardec = cur_vardec->next;
     }
     subroutinebody->vardec = head_vardec.next;
+    head_vardec.next = nullptr;
 
 
     // statements
@@ -355,7 +360,10 @@ JC_Statement* CompilationEngine::compileStatements()
         cur = cur->next;
     }
 
-    return head.next;
+    JC_Statement* ret = head.next;
+    head.next = nullptr;
+
+    return ret;
 }
 
 JC_Statement* CompilationEngine::compileSingleStatement()
