@@ -6,6 +6,7 @@
 #include <fstream>
 #include <queue>
 #include <regex>
+#include <map>
 
 #include "node.h"
 
@@ -124,6 +125,40 @@ class OutputProgram
         void SetFileName(std::string path);
         void printProgram(JC_Program*   program);
 };
+
+class SymbolTable{
+    public:
+        enum SYMBOL_KIND{
+            STATIC = 0,
+            FIELD ,
+            ARG,
+            VAR
+        };
+    private:
+        class symbol_entity{
+            public:
+                std::string type;
+                SYMBOL_KIND kind;
+                int32_t index;
+        };
+        using scope_symbol_table = std::map<std::string, symbol_entity>;
+        scope_symbol_table    class_scope;
+        scope_symbol_table    func_scope;
+        scope_symbol_table*   cur_scope;
+        symbol_entity   getSymbolEntity(std::string name);
+
+        bool is_class_scope = true;
+    public:
+        SymbolTable(){};
+        void init();
+        void startSubroutine();
+        void define(std::string name, std::string type, SYMBOL_KIND kind);
+        int32_t varCount(SYMBOL_KIND kind);
+        SYMBOL_KIND kindOf(std::string name);
+        std::string typeOf(std::string name);
+        int32_t indexOf(std::string name);
+};
+
 
 class CompilationEngine
 {
