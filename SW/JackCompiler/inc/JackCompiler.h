@@ -166,6 +166,7 @@ class CompilationEngine
         JackTokenizer       jt;
         GenXMLFile          m_xml;
         OutputProgram       output_program;
+        SymbolTable         symtbl;
 
         JC_Class* compileClass();
         JC_ClassVarDec* compileClassVarDec();

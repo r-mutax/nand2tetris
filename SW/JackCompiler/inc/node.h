@@ -3,34 +3,6 @@
 
 #include <string>
 
-class Base {
-
-};
-
-class A : public Base {
-    public:
-        A();
-};
-
-class B : public Base {
-    public:
-        B();
-};
-
-class exA : public A{
-    public:
-        exA(){};
-};
-
-class exB : public B {
-    public:
-
-        exB(){
-            m_ex_a = new exA();
-        };
-        A* m_ex_a;
-};
-
 enum JC_NodeType {
     JC_NO_TYPE = 0,
     JC_PROGRAM,
@@ -394,6 +366,14 @@ class JC_ClassVarDec : public JC_Element
             if(type) delete type;
             if(VarName) delete VarName;
         };
+        void combine(JC_ClassVarDec* rhs){
+            JC_ClassVarDec* cur = this;
+            while(cur->next){
+                cur = cur->next;
+            }
+            cur->next = rhs;
+        };
+
         std::string         vartype;
         JC_ClassVarDec*     next;
         JC_Type*            type;

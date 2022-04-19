@@ -16,6 +16,7 @@ CompilationEngine::~CompilationEngine()
 // exec compile file.
 void CompilationEngine::compile(void)
 {
+    symtbl.init();
     JC_Program* prog = new JC_Program();
     prog->cls = compileClass();
     output_program.printProgram(prog);
@@ -45,11 +46,10 @@ JC_Class* CompilationEngine::compileClass()
 
     // check classVarDec
     JC_ClassVarDec  cvd_head;
-    JC_ClassVarDec* cvd_cur = &cvd_head;
-    while(cvd_cur){
-        cvd_cur->next = compileClassVarDec();
-        cvd_cur = cvd_cur->next;
+    while(JC_ClassVarDec* cur = compileClassVarDec()){
+        cvd_head.combine(cur);
     }
+
     cls->classVarDecs = cvd_head.next;
     cvd_head.next = nullptr;
 
@@ -75,62 +75,67 @@ JC_Class* CompilationEngine::compileClass()
 // ( 'static' | 'field' ) type varName ( ',' varName )* ';'
 JC_ClassVarDec* CompilationEngine::compileClassVarDec()
 {
+    std::string var_type;
+    JC_Type* type;
+
     // is classVarDec?
     if(jt.tokenType() != JackTokenizer::KEYWORD
-        || (jt.keyword() != "static" && jt.keyword() != "field")
-    )
-    {
+        || (jt.keyword() != "static" && jt.keyword() != "field")) {
         return nullptr;
     }
 
-    JC_ClassVarDec* cvd = new JC_ClassVarDec();
-
     // (static || field)
-    cvd->vartype = jt.keyword();
+    var_type = jt.keyword();
     jt.advance();
 
+    // judge symbol kind.
+    SymbolTable::SYMBOL_KIND kind;
+    if(var_type == "static"){
+        kind = SymbolTable::SYMBOL_KIND::STATIC;
+    } else if(var_type == "field"){
+        kind = SymbolTable::SYMBOL_KIND::FIELD;
+    }
+
     // type
-    cvd->type = compileType();
-    if( cvd->type == nullptr )
-    {
+    type = compileType();
+    if( type == nullptr ){
         std::cerr << "This is not type." << std::endl;
         exit(1);
     }
 
     // varName
-    cvd->VarName = compileVarName();
-    if( cvd->VarName == nullptr )
-    {
-        std::cerr << "This is not varname." << std::endl;
-        exit(1);
-    }
+    JC_ClassVarDec head_cvd;
+    while(1){
+        JC_ClassVarDec* cur_cvd = new JC_ClassVarDec();
+        cur_cvd->vartype = var_type;
 
-    JC_VarName* cur_varname = cvd->VarName;
-    // (',' varName) *
-    do {
-        if(!jt.expect_token(JackTokenizer::SYMBOL, ","))
-        {
+        cur_cvd->type = new JC_Type();
+        cur_cvd->type->type = type->type;
+        cur_cvd->type->is_keyword = type->is_keyword;
+
+        cur_cvd->VarName = compileVarName();
+
+        head_cvd.combine(cur_cvd);
+
+        symtbl.define(cur_cvd->VarName->name,
+                         cur_cvd->type->type, kind);
+
+        if(jt.expect_token(JackTokenizer::SYMBOL, ";")){
+            jt.advance();
             break;
         }
-        jt.advance();
 
-        cur_varname->next = compileVarName();
-        if(cur_varname->next == nullptr)
-        {
-            std::cerr << "This is not varName." << std::endl;
-            exit(1);
+        if(jt.expect_token(JackTokenizer::SYMBOL, ",")){
+            jt.advance();
+        } else {
+            // If .jack program is correct, don't reach here.
         }
-        cur_varname = cur_varname->next;
-    
-    } while (1);
-
-    if(!jt.expect_token(JackTokenizer::SYMBOL, ";")){
-        std::cerr << "Expect \";\" ." << std::endl;
-        exit(1);
     }
-    jt.advance();
 
-    return cvd;
+    JC_ClassVarDec* ret = head_cvd.next;
+    head_cvd.next = nullptr;
+
+    return ret;
 }
 
 // 'int' | 'char' | 'boolean' | className

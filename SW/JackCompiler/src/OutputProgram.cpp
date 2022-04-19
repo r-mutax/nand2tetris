@@ -48,13 +48,6 @@ void OutputProgram::printClassVarDec(JC_ClassVarDec* clsvardec)
     JC_VarName* varname = (JC_VarName*)(clsvardec->VarName);
     m_xml.printDataLine("identifier", varname->name);
 
-    varname = (JC_VarName*)varname->next;
-    while(varname){
-        m_xml.printDataLine("symbol", ",");
-        m_xml.printDataLine("identifier", varname->name);
-        varname = (JC_VarName*)varname->next;
-    }
-
     m_xml.printDataLine("symbol", ";");
     m_xml.printDataTail("classVarDec");
 }
