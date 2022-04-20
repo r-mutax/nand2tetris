@@ -162,12 +162,10 @@ void OutputProgram::printVarDec(JC_VarDec* vardec)
     m_xml.printDataLine("identifier", varname->name);
     varname = varname->next;
 
-    while(varname){
-        m_xml.printDataLine("symbol", ",");
-        m_xml.printDataLine("identifier", varname->name);
-        varname = varname->next;
-    }
-    vardec = vardec->next;
+    m_xml.printDataLine("index", std::to_string(vardec->index));
+    m_xml.printDataLine("kind", std::to_string(vardec->kind));
+
+
     m_xml.printDataLine("symbol", ";");
     m_xml.printDataTail("varDec");
 }

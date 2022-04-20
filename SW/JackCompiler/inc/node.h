@@ -82,9 +82,20 @@ class JC_VarDec : public JC_Element
             if(type) delete type;
             if(varname) delete varname;
         };
+
+        void combine(JC_VarDec* rhs){
+            JC_VarDec* cur = this;
+            while(cur->next){
+                cur = cur->next;
+            }
+            cur->next = rhs;
+        };
+
         JC_VarDec* next;
         JC_Type* type;
         JC_VarName* varname;
+        int                 index;
+        int                 kind;
 };
 
 enum StatementType {

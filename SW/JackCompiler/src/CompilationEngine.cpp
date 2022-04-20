@@ -105,7 +105,7 @@ JC_ClassVarDec* CompilationEngine::compileClassVarDec()
 
     // varName
     JC_ClassVarDec head_cvd;
-    while(1){
+    while(1){ 
         JC_ClassVarDec* cur_cvd = new JC_ClassVarDec();
         cur_cvd->vartype = var_type;
 
@@ -251,6 +251,8 @@ JC_Subroutine* CompilationEngine::compileSubroutine()
         return nullptr;
     }
 
+    symtbl.startSubroutine();
+
     JC_Subroutine*  subroutine = new JC_Subroutine();
     
     // ('constructor' | 'function' | 'method')
@@ -336,27 +338,44 @@ JC_VarDec* CompilationEngine::compileVarDec()
     }
     jt.advance();
 
-    JC_VarDec* vardec = new JC_VarDec();
+    JC_Type* type = compileType();
 
-    vardec->type = compileType();
-    vardec->varname = compileVarName();
+    JC_VarDec head_vardec;
+    while(1){
+        JC_VarDec* vardec = new JC_VarDec();
 
-    JC_VarName* varname = vardec->varname;
+        vardec->type = new JC_Type();
+        vardec->type->is_keyword = type->is_keyword;
+        vardec->type->type = type->type;
 
-    while(jt.expect_token(JackTokenizer::SYMBOL, ",")){
-        jt.advance();
-        varname->next = compileVarName();
-        varname = varname->next;
+        vardec->varname = compileVarName();
+
+        symtbl.define(vardec->varname->name,
+                    vardec->type->type, SymbolTable::VAR);
+        
+        vardec->index = symtbl.indexOf(vardec->varname->name);
+        vardec->kind = symtbl.kindOf(vardec->varname->name);
+
+        head_vardec.combine(vardec);
+
+        if(jt.expect_token(JackTokenizer::SYMBOL, ";")){
+            jt.advance();
+            break;
+        }
+
+        if(jt.expect_token(JackTokenizer::SYMBOL, ",")){
+            jt.advance();
+        } else {
+            // If .jack program is correct, don't reach here.
+        }
     }
 
-    // check ";"
-    if(!jt.expect_token(JackTokenizer::SYMBOL, ";")){
-        std::cerr << "Expect ; ." << std::endl;
-        exit(1);        
-    }
-    jt.advance();
+    JC_VarDec* ret = head_vardec.next;
+    head_vardec.next = nullptr;
 
-    return vardec;
+    delete type;
+
+    return ret;
 }
 
 JC_Statement* CompilationEngine::compileStatements()
