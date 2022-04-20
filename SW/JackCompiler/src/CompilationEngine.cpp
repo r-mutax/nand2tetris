@@ -217,6 +217,12 @@ JC_Parameter* CompilationEngine::compileParameterList()
         cur->next->type = compileType();
         cur->next->varname = compileVarName();
 
+        symtbl.define(cur->next->varname->name
+                        , cur->next->type->type, SymbolTable::ARG);
+        
+        cur->next->index = symtbl.indexOf(cur->next->varname->name);
+        cur->next->kind = SymbolTable::ARG;
+
         if(jt.tokenType() == JackTokenizer::SYMBOL)
         {
             if(jt.symbol() == ")"){

@@ -112,6 +112,8 @@ void OutputProgram::printParameterList(JC_Parameter* param)
         }
 
         m_xml.printDataLine("identifier", varname->name);
+        m_xml.printDataLine("index", std::to_string(param->index));
+        m_xml.printDataLine("kind", std::to_string(param->kind));
 
         if(param->next){
             m_xml.printDataLine("symbol", ",");

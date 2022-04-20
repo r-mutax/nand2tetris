@@ -67,6 +67,9 @@ class JC_Parameter : JC_Element
         JC_Type*        type;
         JC_VarName*     varname;
         JC_Parameter*   next;
+
+        int             index;
+        int             kind;
 };
 
 class JC_VarDec : public JC_Element
