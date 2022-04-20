@@ -48,6 +48,9 @@ void OutputProgram::printClassVarDec(JC_ClassVarDec* clsvardec)
     JC_VarName* varname = (JC_VarName*)(clsvardec->VarName);
     m_xml.printDataLine("identifier", varname->name);
 
+    m_xml.printDataLine("index", std::to_string(clsvardec->index));
+    m_xml.printDataLine("kind", std::to_string(clsvardec->kind));
+
     m_xml.printDataLine("symbol", ";");
     m_xml.printDataTail("classVarDec");
 }

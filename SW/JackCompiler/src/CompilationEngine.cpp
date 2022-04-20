@@ -115,10 +115,13 @@ JC_ClassVarDec* CompilationEngine::compileClassVarDec()
 
         cur_cvd->VarName = compileVarName();
 
-        head_cvd.combine(cur_cvd);
-
         symtbl.define(cur_cvd->VarName->name,
                          cur_cvd->type->type, kind);
+
+        cur_cvd->index = symtbl.indexOf(cur_cvd->VarName->name);
+        cur_cvd->kind = kind;
+
+        head_cvd.combine(cur_cvd);
 
         if(jt.expect_token(JackTokenizer::SYMBOL, ";")){
             jt.advance();

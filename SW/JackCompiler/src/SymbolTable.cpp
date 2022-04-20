@@ -20,7 +20,7 @@ void SymbolTable::define(std::string name, std::string type, SYMBOL_KIND kind)
     symbol_entity entity;
     entity.type = type;
     entity.kind = kind;
-    entity.index = cur_scope->size() + 1;
+    entity.index = cur_scope->size();
 
     (*cur_scope)[name] = entity;
 }

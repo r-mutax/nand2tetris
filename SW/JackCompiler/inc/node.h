@@ -378,6 +378,10 @@ class JC_ClassVarDec : public JC_Element
         JC_ClassVarDec*     next;
         JC_Type*            type;
         JC_VarName*         VarName;
+
+        int                 index;
+        int                 kind;
+
 };
 
 class JC_Class : public JC_Element
