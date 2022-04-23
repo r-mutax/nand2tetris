@@ -6,6 +6,7 @@ CompilationEngine::CompilationEngine(const std::string path)
 {
     jt.Open(path);
     output_program.SetFileName(change_extension(path, "xml"));
+    vmwriter.setFileName(change_extension(path, "vm"));
 }
 
 CompilationEngine::~CompilationEngine()
@@ -19,7 +20,9 @@ void CompilationEngine::compile(void)
     symtbl.init();
     JC_Program* prog = new JC_Program();
     prog->cls = compileClass();
-    output_program.printProgram(prog);
+    vmwriter.genVMFile(prog);
+    
+    //output_program.printProgram(prog);
 }
 
 // 'class' className '{' classVarDec* subroutineDec* '}'
@@ -512,6 +515,15 @@ JC_SubroutineCall* CompilationEngine::compileSubroutineCall()
 
         // skip ".".
         jt.advance();
+    }
+
+    // decide "is method call?"
+    if(subcall->classname != ""){
+        if(symtbl.is_defined(subcall->classname)){
+            subcall->is_method = true;
+        }
+    } else {
+        subcall->is_method = true;
     }
 
     // subroutine name

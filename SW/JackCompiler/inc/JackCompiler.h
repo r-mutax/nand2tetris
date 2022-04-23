@@ -157,8 +157,66 @@ class SymbolTable{
         SYMBOL_KIND kindOf(std::string name);
         std::string typeOf(std::string name);
         int32_t indexOf(std::string name);
+        bool is_defined(std::string name);
 };
 
+class VMWriter{
+        enum VM_Segment{
+            CONST = 0,
+            ARG,
+            LOCAL,
+            STATIC,
+            THIS,
+            THAT,
+            POINTER,
+            TEMP
+        };
+        enum VM_Command{
+            ADD = 0,
+            SUB,
+            NEG,
+            EQ,
+            GT,
+            LT,
+            AND,
+            OR,
+            NOT
+        };
+
+        std::ofstream   m_ofs;
+        std::string classname;
+
+        // naming rule.
+        // write~~() : writeVMFile function.
+        // gen~~() : it has node element as argument, call write~~() functions.
+        void writePush(VM_Segment seg, int32_t idx);
+        void writePop(VM_Segment seg, int32_t idx);
+        void writeArithmetic(VM_Command cmd);
+        void writeLabel(std::string label);
+        void writeGoto(std::string label);
+        void writeIf(std::string label);
+        void writeCall(std::string name, int32_t nArgs);
+        void writeFunction(std::string name, int32_t nLocals);
+        void writeReturn();
+        void writeOperand(JC_Operand* op);
+
+        void genConstructor(JC_Subroutine* constructor);
+        void genFunction(JC_Subroutine* function);
+        void genMethod(JC_Subroutine* method);
+        void genMultipleStatements(JC_Statement* multi_statements);
+        void genDoStatement(JC_DoStatement* do_stmt);
+        void genReturnStatement(JC_ReturnStatement* ret_stmt);
+        void genExpression(JC_Expression* exp);
+        void genTerm(JC_Term* term);
+
+        int32_t countParameter(JC_Subroutine* function);
+        std::string getFunctionName(JC_Subroutine* function);
+    public:
+        VMWriter();
+        void setFileName(std::string filename);
+        void genVMFile(JC_Program* prog);
+        void Close();
+};
 
 class CompilationEngine
 {
@@ -167,6 +225,7 @@ class CompilationEngine
         GenXMLFile          m_xml;
         OutputProgram       output_program;
         SymbolTable         symtbl;
+        VMWriter            vmwriter;
 
         JC_Class* compileClass();
         JC_ClassVarDec* compileClassVarDec();

@@ -72,3 +72,7 @@ int32_t SymbolTable::indexOf(std::string name)
 
     return ent.index;
 }
+
+bool SymbolTable::is_defined(std::string name){
+    return func_scope.count(name) == 1 || class_scope.count(name) == 1;
+}

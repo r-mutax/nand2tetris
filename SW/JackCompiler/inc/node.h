@@ -158,6 +158,7 @@ class JC_SubroutineCall : public JC_Element
             subroutine_name = nullptr;
             exp = nullptr;
             classname = "";
+            is_method = false;
         };
         ~JC_SubroutineCall(){
             if(subroutine_name) delete subroutine_name;
@@ -167,6 +168,7 @@ class JC_SubroutineCall : public JC_Element
         JC_SubroutineName* subroutine_name;
         std::string classname;
         JC_Expression* exp;
+        bool is_method;
 };
 
 class JC_Term : public JC_TermBase
