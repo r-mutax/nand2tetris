@@ -4,6 +4,9 @@ VMWriter::VMWriter(){
 
 };
 
+void VMWriter::init(){
+}
+
 void VMWriter::setFileName(std::string filename){
     m_ofs.open(filename);
 }
@@ -34,10 +37,13 @@ void VMWriter::genConstructor(JC_Subroutine* constructor){
 
 void VMWriter::genFunction(JC_Subroutine* function)
 {
-    int param_num = countParameter(function);
+    // init label count.
+    while_cnt = 0;
+    if_cnt = 0;
+
     std::string funcname = getFunctionName(function);
 
-    writeFunction(funcname, param_num);
+    writeFunction(funcname, function->varcount);
 
     genMultipleStatements(function->body->statements);
 }
@@ -52,10 +58,13 @@ void VMWriter::genMultipleStatements(JC_Statement* multi_statements)
     while(cur){
         switch(cur->type){
             case LET_STATEMENT:
+                genLetStatement((JC_LetStatement*) cur);
                 break;
             case IF_STATEMENT:
+                genIfStatement((JC_IfStatement*) cur);
                 break;
             case WHILE_STATEMENT:
+                genWhileStatement((JC_WhileStatement*) cur);
                 break;
             case DO_STATEMENT:
                 genDoStatement((JC_DoStatement*) cur);
@@ -71,39 +80,82 @@ void VMWriter::genMultipleStatements(JC_Statement* multi_statements)
 
 }
 
+void VMWriter::genLetStatement(JC_LetStatement* let_stmt){
+
+    // push stack rhs.
+    genExpression(let_stmt->rhs);
+
+    // pop to lhs.
+    JC_Variant* var = let_stmt->lhs;
+    
+    switch(var->kind){
+        case SymbolTable::STATIC:
+            writePop(STATIC, var->index);
+            break;
+        case SymbolTable::FIELD:
+            break;
+        case SymbolTable::ARG:
+            writePop(ARG, var->index);
+            break;
+        case SymbolTable::VAR:
+            writePop(LOCAL, var->index);
+            break;
+    }
+}
+
+void VMWriter::genIfStatement(JC_IfStatement* if_stmt){
+
+    int32_t if_label_cnt = if_cnt++;
+    std::string true_label = "IF_TRUE" + std::to_string(if_label_cnt);
+    std::string false_label = "IF_FALSE" + std::to_string(if_label_cnt);
+    std::string end_label = "IF_END" + std::to_string(if_label_cnt);
+
+    genExpression(if_stmt->cond);
+
+    m_ofs << "if-goto " << true_label << std::endl;
+    writeGoto(false_label);
+
+    // true stmts.
+    writeLabel(true_label);
+    genMultipleStatements(if_stmt->true_statements->statement_body);
+    writeGoto(end_label);
+
+    // false stmts.
+    writeLabel(false_label);
+    genMultipleStatements(if_stmt->false_statements->statement_body);
+    
+    writeLabel(end_label);
+}
+
+void VMWriter::genWhileStatement(JC_WhileStatement* while_stmt){
+
+    int32_t while_label_cnt = while_cnt++;
+    std::string while_head = "WHILE_EXP" + std::to_string(while_label_cnt);
+    std::string break_point = "WHILE_END" + std::to_string(while_label_cnt);
+
+    writeLabel(while_head);
+    genExpression(while_stmt->cond);
+    m_ofs << "not" << std::endl;
+
+    m_ofs << "if-goto " << break_point << std::endl;
+    genMultipleStatements(while_stmt->while_body->statement_body);
+    writeGoto(while_head);
+
+    writeLabel(break_point);
+}
+
 void VMWriter::genDoStatement(JC_DoStatement* do_stmt)
 {
-    // if call "method", push "this" pointer.
-    if(do_stmt->subcall->is_method){
-        writePush(POINTER, 0);
-    }
-
-    // push arguments.
-    int32_t nLocals = 0;
-    JC_Expression* cur = do_stmt->subcall->exp;
-    while(cur){
-        nLocals++;
-        genExpression(cur);
-        cur = cur->next;
-    }
-
-    // function call.
-    std::string funcname = do_stmt->subcall->subroutine_name->name;
-    if(do_stmt->subcall->is_method){
-        nLocals++;
-    }
-
-    if(do_stmt->subcall->classname != ""){
-        funcname = do_stmt->subcall->classname + "." + funcname;
-    }
-
-    writeCall(funcname, nLocals);
+    genSubcall(do_stmt->subcall);
+    writePop(TEMP, 0);
 }
 
 void VMWriter::genReturnStatement(JC_ReturnStatement* ret_stmt){
 
     if(ret_stmt->exp){
         genExpression(ret_stmt->exp);
+    } else {
+        writePush(CONST, 0);
     }
 
     writeReturn();
@@ -119,7 +171,7 @@ void VMWriter::genExpression(JC_Expression* exp){
     if(term->op){
         genTerm(term);
         genTerm((JC_Term*)term->next);
-        writeOperand(term->op);
+        writeOperand(term->op->op);
     } else {
         genTerm(term);        
     }
@@ -133,15 +185,79 @@ void VMWriter::genTerm(JC_Term* term){
         case STRING_CONST:
             break;
         case KEYWORD_CONST:
+            if(term->stringVal == "true"){
+                writePush(CONST, 0);
+                m_ofs << "not" << std::endl;
+            } else if(term->stringVal == "false"){
+                writePush(CONST, 0);
+            } else if(term->stringVal == "null"){
+                writePush(CONST, 0);
+            } else if(term->stringVal == "this"){
+
+            }
             break;
         case VARIANT:
+            genVariant((JC_Variant*)term->var);
             break;
         case SUBROUTINECALL:
+            genSubcall(term->subcall);
             break;
         case EXPRESSION:
             genExpression(term->exp);
             break;
         case UNARYOP_TERM:
+            genTerm((JC_Term*)term->next);
+            if(term->unary_op->op == "-"){
+                m_ofs << "neg" << std::endl;
+            } else if (term->unary_op->op == "~"){
+                m_ofs << "not" << std::endl;
+            }
+            break;
+    }
+}
+
+void VMWriter::genSubcall(JC_SubroutineCall* subcall){
+    
+    // if call "method", push "this" pointer.
+    if(subcall->is_method){
+        writePush(POINTER, 0);
+    }
+
+    // push arguments.
+    int32_t nLocals = 0;
+    JC_Expression* cur = subcall->exp;
+    while(cur){
+        nLocals++;
+        genExpression(cur);
+        cur = cur->next;
+    }
+
+    // function call.
+    std::string funcname = subcall->subroutine_name->name;
+    if(subcall->is_method){
+        nLocals++;
+    }
+
+    if(subcall->classname != ""){
+        funcname = subcall->classname + "." + funcname;
+    }
+
+    writeCall(funcname, nLocals);
+}
+
+void VMWriter::genVariant(JC_Variant* var){
+
+    switch(var->kind){
+        case SymbolTable::STATIC:
+            writePush(STATIC, var->index);
+            break;
+        case SymbolTable::FIELD:
+            break;
+        case SymbolTable::ARG:
+            writePush(ARG, var->index);
+            break;
+        case SymbolTable::VAR:
+            writePush(LOCAL, var->index);
             break;
     }
 }
@@ -167,8 +283,14 @@ void VMWriter::writePush(VM_Segment seg, int32_t idx){
             m_ofs << "push constant " << idx << std::endl;
             break;
         case ARG:
+            m_ofs << "push argument " << idx << std::endl;
+            break;
         case LOCAL:
+            m_ofs << "push local " << idx << std::endl;
+            break;
         case STATIC:
+            m_ofs << "push static " << idx << std::endl;
+            break;
         case THIS:
         case THAT:
             break;
@@ -178,6 +300,32 @@ void VMWriter::writePush(VM_Segment seg, int32_t idx){
         case TEMP:
             break;
     }
+}
+
+void VMWriter::writePop(VM_Segment seg, int32_t idx){
+       switch(seg){
+        case ARG:
+            m_ofs << "pop argument " << idx << std::endl;
+            break;
+        case LOCAL:
+            m_ofs << "pop local " << idx << std::endl;
+            break;
+        case STATIC:
+            m_ofs << "pop static " << idx << std::endl;
+            break;
+        case TEMP:
+            m_ofs << "pop temp " << idx << std::endl;
+            break;
+    }
+ 
+}
+
+void VMWriter::writeLabel(std::string label){
+    m_ofs << "label " << label << std::endl;
+}
+
+void VMWriter::writeGoto(std::string label){
+    m_ofs << "goto " << label << std::endl;
 }
 
 void VMWriter::writeFunction(std::string name, int32_t nLocals)
@@ -193,24 +341,24 @@ void VMWriter::writeCall(std::string funcname, int32_t nArgs){
     m_ofs << "call " << funcname << " " << nArgs << std::endl;
 }
 
-void VMWriter::writeOperand(JC_Operand* op){
-    if(op->op == "+"){
+void VMWriter::writeOperand(std::string op){
+    if(op == "+"){
         m_ofs << "add" << std::endl;
-    } else if(op->op == "-"){
+    } else if(op == "-"){
         m_ofs << "sub" << std::endl;
-    } else if(op->op == "*"){
+    } else if(op == "*"){
         m_ofs << "call Math.multiply 2" << std::endl;
-    } else if(op->op == "/"){
+    } else if(op == "/"){
         m_ofs << "call Math.divide 2" << std::endl;
-    } else if(op->op == "&"){
+    } else if(op == "&"){
         m_ofs << "and" << std::endl;
-    } else if(op->op == "|"){
+    } else if(op == "|"){
         m_ofs << "or" << std::endl;
-    } else if(op->op == "<"){
+    } else if(op == "<"){
         m_ofs << "lt" << std::endl;
-    } else if(op->op == ">"){
+    } else if(op == ">"){
         m_ofs << "gt" << std::endl;
-    } else if(op->op == "="){
+    } else if(op == "="){
         m_ofs << "eq" << std::endl;
     } else {
 

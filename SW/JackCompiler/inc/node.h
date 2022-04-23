@@ -207,6 +207,8 @@ class JC_Variant : public JC_VariantBase
         {
             varname = nullptr;
             exp = nullptr;
+            index = -1;
+            kind = -1;
         };
         ~JC_Variant(){
             if(varname) delete varname;
@@ -214,6 +216,9 @@ class JC_Variant : public JC_VariantBase
         };
         JC_VarName* varname;
         JC_Expression* exp;
+
+        int             index;
+        int             kind;
 };
 
 
@@ -366,6 +371,7 @@ class JC_Subroutine : public JC_Element
         JC_SubroutineBody*  body;
         JC_Parameter*       parameterlist;
         JC_Subroutine*      next;
+        int32_t             varcount;
 };
 
 class JC_ClassVarDec : public JC_Element

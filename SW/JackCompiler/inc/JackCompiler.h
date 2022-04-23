@@ -185,6 +185,8 @@ class VMWriter{
 
         std::ofstream   m_ofs;
         std::string classname;
+        int32_t while_cnt = 0;
+        int32_t if_cnt = 0;
 
         // naming rule.
         // write~~() : writeVMFile function.
@@ -198,21 +200,27 @@ class VMWriter{
         void writeCall(std::string name, int32_t nArgs);
         void writeFunction(std::string name, int32_t nLocals);
         void writeReturn();
-        void writeOperand(JC_Operand* op);
+        void writeOperand(std::string op);
 
         void genConstructor(JC_Subroutine* constructor);
         void genFunction(JC_Subroutine* function);
         void genMethod(JC_Subroutine* method);
         void genMultipleStatements(JC_Statement* multi_statements);
+        void genLetStatement(JC_LetStatement* let_stmt);
+        void genIfStatement(JC_IfStatement* if_stmt);
+        void genWhileStatement(JC_WhileStatement* while_stmt);
         void genDoStatement(JC_DoStatement* do_stmt);
         void genReturnStatement(JC_ReturnStatement* ret_stmt);
         void genExpression(JC_Expression* exp);
         void genTerm(JC_Term* term);
+        void genSubcall(JC_SubroutineCall* subcall);
+        void genVariant(JC_Variant* var);
 
         int32_t countParameter(JC_Subroutine* function);
         std::string getFunctionName(JC_Subroutine* function);
     public:
         VMWriter();
+        void init();
         void setFileName(std::string filename);
         void genVMFile(JC_Program* prog);
         void Close();

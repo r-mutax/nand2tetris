@@ -18,6 +18,7 @@ CompilationEngine::~CompilationEngine()
 void CompilationEngine::compile(void)
 {
     symtbl.init();
+    vmwriter.init();
     JC_Program* prog = new JC_Program();
     prog->cls = compileClass();
     vmwriter.genVMFile(prog);
@@ -298,6 +299,7 @@ JC_Subroutine* CompilationEngine::compileSubroutine()
     jt.advance();
 
     subroutine->body = compileSubroutineBody();
+    subroutine->varcount = symtbl.varCount(SymbolTable::VAR);
 
     return subroutine;
 }
@@ -450,6 +452,9 @@ JC_Statement* CompilationEngine::compileLet()
     // varName [ expression ]
     JC_Variant* var = new JC_Variant();
     var->varname = compileVarName();
+
+    var->index = symtbl.indexOf(var->varname->name);
+    var->kind = symtbl.kindOf(var->varname->name);
 
     if(jt.expect_token(JackTokenizer::SYMBOL, "[")){
         jt.advance();
@@ -790,6 +795,8 @@ JC_Variant* CompilationEngine::compileVariant()
     JC_Variant* var = new JC_Variant();
 
     var->varname = compileVarName();
+    var->index = symtbl.indexOf(var->varname->name);
+    var->kind = symtbl.kindOf(var->varname->name);
 
     // is array?
     if(jt.expect_token(JackTokenizer::SYMBOL, "[")){
