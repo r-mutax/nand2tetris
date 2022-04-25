@@ -101,25 +101,53 @@ void VMWriter::genMultipleStatements(JC_Statement* multi_statements)
 
 void VMWriter::genLetStatement(JC_LetStatement* let_stmt){
 
+    JC_Variant* var = let_stmt->lhs;
+
+    // if rhs is array.
+    if(var->exp){
+        genExpression(var->exp);
+
+        switch(var->kind){
+            case SymbolTable::STATIC:
+                writePush(STATIC, var->index);
+                break;
+            case SymbolTable::FIELD:
+                writePush(THIS, var->index);
+                break;
+            case SymbolTable::ARG:
+                writePush(ARG, var->index);
+                break;
+            case SymbolTable::VAR:
+                writePush(LOCAL, var->index);
+                break;
+        }
+        writeOperand("+");
+    }
+
     // push stack rhs.
     genExpression(let_stmt->rhs);
 
     // pop to lhs.
-    JC_Variant* var = let_stmt->lhs;
-    
-    switch(var->kind){
-        case SymbolTable::STATIC:
-            writePop(STATIC, var->index);
-            break;
-        case SymbolTable::FIELD:
-            writePop(THIS, var->index);
-            break;
-        case SymbolTable::ARG:
-            writePop(ARG, var->index);
-            break;
-        case SymbolTable::VAR:
-            writePop(LOCAL, var->index);
-            break;
+    if(var->exp){
+        writePop(TEMP, 0);      // escap expression retval.
+        writePop(POINTER, 1);   // set "THAT" pointer.
+        writePush(TEMP, 0);     // return expression retval.
+        writePop(THAT, 0);      // pop to lhs.
+    } else {
+        switch(var->kind){
+            case SymbolTable::STATIC:
+                writePop(STATIC, var->index);
+                break;
+            case SymbolTable::FIELD:
+                writePop(THIS, var->index);
+                break;
+            case SymbolTable::ARG:
+                writePop(ARG, var->index);
+                break;
+            case SymbolTable::VAR:
+                writePop(LOCAL, var->index);
+                break;
+        }
     }
 }
 
@@ -207,6 +235,16 @@ void VMWriter::genTerm(JC_Term* term){
             writePush(CONST, term->integerVal);
             break;
         case STRING_CONST:
+        {
+            int length = term->stringVal.length();
+            writePush(CONST, length);
+            writeCall("String.new", 1);
+
+            for(int i = 0; i < length; i++){
+                writePush(CONST, (int32_t)(term->stringVal[i]));
+                writeCall("String.appendChar", 2);
+            }
+        }
             break;
         case KEYWORD_CONST:
             if(term->stringVal == "true"){
@@ -221,7 +259,22 @@ void VMWriter::genTerm(JC_Term* term){
             }
             break;
         case VARIANT:
+        {
+            bool isArray = false;
+            if(((JC_Variant*)(term->var))->exp){
+                isArray = true;
+            }
+
+            if(isArray){
+                genExpression(((JC_Variant*)(term->var))->exp);
+            }
             genVariant((JC_Variant*)term->var);
+            if(isArray){
+                writeOperand("+");
+                writePop(POINTER, 1);
+                writePush(THAT, 0);
+            }
+        }
             break;
         case SUBROUTINECALL:
             genSubcall(term->subcall);
@@ -344,11 +397,13 @@ void VMWriter::writePush(VM_Segment seg, int32_t idx){
             m_ofs << "push this " << idx << std::endl;
             break;
         case THAT:
+            m_ofs << "push that " << idx << std::endl;
             break;
         case POINTER:
             m_ofs << "push pointer " << idx << std::endl;
             break;
         case TEMP:
+            m_ofs << "push temp " << idx << std::endl;
             break;
     }
 }
@@ -372,6 +427,9 @@ void VMWriter::writePop(VM_Segment seg, int32_t idx){
             break;
         case THIS:
             m_ofs << "pop this " << idx << std::endl;
+            break;
+        case THAT:
+            m_ofs << "pop that " << idx << std::endl;
             break;
     }
  
