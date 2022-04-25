@@ -57,6 +57,9 @@ JC_Class* CompilationEngine::compileClass()
     cls->classVarDecs = cvd_head.next;
     cvd_head.next = nullptr;
 
+    // count field variable.
+    cls->field_cnt = symtbl.varCount(SymbolTable::FIELD);
+
     // check subroutineDec
     JC_Subroutine subr_head;
     JC_Subroutine* subr_cur = &subr_head;
@@ -71,7 +74,6 @@ JC_Class* CompilationEngine::compileClass()
     if(jt.expect_token(JackTokenizer::SYMBOL, "}")){
         jt.advance();
     }
-
 
     return cls;
 }
@@ -520,6 +522,13 @@ JC_SubroutineCall* CompilationEngine::compileSubroutineCall()
 
         // skip ".".
         jt.advance();
+
+        if(symtbl.is_defined(subcall->classname)){
+            subcall->is_var = true;
+            subcall->index = symtbl.indexOf(subcall->classname);
+            subcall->kind = symtbl.kindOf(subcall->classname);
+            subcall->tyname = symtbl.typeOf(subcall->classname);
+        }
     }
 
     // decide "is method call?"

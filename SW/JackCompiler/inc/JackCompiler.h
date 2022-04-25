@@ -202,7 +202,7 @@ class VMWriter{
         void writeReturn();
         void writeOperand(std::string op);
 
-        void genConstructor(JC_Subroutine* constructor);
+        void genConstructor(JC_Subroutine* constructor, int32_t size);
         void genFunction(JC_Subroutine* function);
         void genMethod(JC_Subroutine* method);
         void genMultipleStatements(JC_Statement* multi_statements);

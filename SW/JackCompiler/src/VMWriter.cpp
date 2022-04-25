@@ -19,9 +19,13 @@ void VMWriter::genVMFile(JC_Program* prog){
     JC_Subroutine* subroutine_cur = cls->classSubroutinDecs;
 
     while(subroutine_cur){
-        
+
+        // init label count.
+        while_cnt = 0;
+        if_cnt = 0;
+
         if(subroutine_cur->subroutinetype == "constructor"){
-            genConstructor(subroutine_cur);
+            genConstructor(subroutine_cur, cls->field_cnt);
         } else if(subroutine_cur->subroutinetype == "function"){
             genFunction(subroutine_cur);
         } else if(subroutine_cur->subroutinetype == "method"){
@@ -31,16 +35,21 @@ void VMWriter::genVMFile(JC_Program* prog){
     }
 }
 
-void VMWriter::genConstructor(JC_Subroutine* constructor){
+void VMWriter::genConstructor(JC_Subroutine* constructor, int32_t size){
 
+    std::string funcname = classname + "." + constructor->name->name;
+    writeFunction(funcname, constructor->varcount);
+
+    // alloc class field.
+    writePush(CONST, size);
+    writeCall("Memory.alloc", 1);
+    writePop(POINTER, 0);
+
+    genMultipleStatements(constructor->body->statements);
 }
 
 void VMWriter::genFunction(JC_Subroutine* function)
 {
-    // init label count.
-    while_cnt = 0;
-    if_cnt = 0;
-
     std::string funcname = getFunctionName(function);
 
     writeFunction(funcname, function->varcount);
@@ -50,6 +59,16 @@ void VMWriter::genFunction(JC_Subroutine* function)
 
 void VMWriter::genMethod(JC_Subroutine* method){
 
+    std::string funcname = classname + "." + method->name->name;
+    int32_t varcount = method->varcount;
+
+    writeFunction(funcname, varcount);
+
+    // pop argument to pointer 0
+    writePush(ARG, 0);
+    writePop(POINTER, 0);
+
+    genMultipleStatements(method->body->statements);
 }
 
 void VMWriter::genMultipleStatements(JC_Statement* multi_statements)
@@ -93,6 +112,7 @@ void VMWriter::genLetStatement(JC_LetStatement* let_stmt){
             writePop(STATIC, var->index);
             break;
         case SymbolTable::FIELD:
+            writePop(THIS, var->index);
             break;
         case SymbolTable::ARG:
             writePop(ARG, var->index);
@@ -118,13 +138,17 @@ void VMWriter::genIfStatement(JC_IfStatement* if_stmt){
     // true stmts.
     writeLabel(true_label);
     genMultipleStatements(if_stmt->true_statements->statement_body);
-    writeGoto(end_label);
+    if(if_stmt->false_statements){
+        writeGoto(end_label);
+    }
 
-    // false stmts.
     writeLabel(false_label);
-    genMultipleStatements(if_stmt->false_statements->statement_body);
+    // false stmts.
+    if(if_stmt->false_statements){    
+        genMultipleStatements(if_stmt->false_statements->statement_body);
+        writeLabel(end_label);
+    }
     
-    writeLabel(end_label);
 }
 
 void VMWriter::genWhileStatement(JC_WhileStatement* while_stmt){
@@ -193,7 +217,7 @@ void VMWriter::genTerm(JC_Term* term){
             } else if(term->stringVal == "null"){
                 writePush(CONST, 0);
             } else if(term->stringVal == "this"){
-
+                writePush(POINTER, 0);
             }
             break;
         case VARIANT:
@@ -218,9 +242,38 @@ void VMWriter::genTerm(JC_Term* term){
 
 void VMWriter::genSubcall(JC_SubroutineCall* subcall){
     
-    // if call "method", push "this" pointer.
+    std::string subcall_cls = "";
+
+    if(subcall->is_var){
+        subcall_cls = subcall->tyname;
+    } else if(subcall->is_method && subcall->classname == ""){
+        subcall_cls = classname;
+    } else {
+        subcall_cls = subcall->classname;
+    }
+
+    std::string funcname = subcall_cls + "." + subcall->subroutine_name->name;
+
+    // if call "method", push class variable pointer.
     if(subcall->is_method){
-        writePush(POINTER, 0);
+        if(subcall->classname == ""){
+            writePush(POINTER, 0);            
+        } else {
+            switch(subcall->kind){
+                case SymbolTable::STATIC:
+                    writePush(STATIC, subcall->index);
+                    break;
+                case SymbolTable::FIELD:
+                    writePush(THIS, subcall->index);
+                    break;
+                case SymbolTable::ARG:
+                    writePush(ARG, subcall->index);
+                    break;
+                case SymbolTable::VAR:
+                    writePush(LOCAL, subcall->index);
+                    break;
+                }
+        }
     }
 
     // push arguments.
@@ -231,18 +284,13 @@ void VMWriter::genSubcall(JC_SubroutineCall* subcall){
         genExpression(cur);
         cur = cur->next;
     }
-
-    // function call.
-    std::string funcname = subcall->subroutine_name->name;
     if(subcall->is_method){
         nLocals++;
     }
 
-    if(subcall->classname != ""){
-        funcname = subcall->classname + "." + funcname;
-    }
-
     writeCall(funcname, nLocals);
+
+    return ;
 }
 
 void VMWriter::genVariant(JC_Variant* var){
@@ -252,6 +300,7 @@ void VMWriter::genVariant(JC_Variant* var){
             writePush(STATIC, var->index);
             break;
         case SymbolTable::FIELD:
+            writePush(THIS, var->index);
             break;
         case SymbolTable::ARG:
             writePush(ARG, var->index);
@@ -292,6 +341,8 @@ void VMWriter::writePush(VM_Segment seg, int32_t idx){
             m_ofs << "push static " << idx << std::endl;
             break;
         case THIS:
+            m_ofs << "push this " << idx << std::endl;
+            break;
         case THAT:
             break;
         case POINTER:
@@ -315,6 +366,12 @@ void VMWriter::writePop(VM_Segment seg, int32_t idx){
             break;
         case TEMP:
             m_ofs << "pop temp " << idx << std::endl;
+            break;
+        case POINTER:
+            m_ofs << "pop pointer " << idx << std::endl;
+            break;
+        case THIS:
+            m_ofs << "pop this " << idx << std::endl;
             break;
     }
  
