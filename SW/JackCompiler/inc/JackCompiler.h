@@ -148,6 +148,7 @@ class SymbolTable{
         symbol_entity   getSymbolEntity(std::string name);
 
         bool is_class_scope = true;
+        bool is_method = false;
     public:
         SymbolTable(){};
         void init();
@@ -158,6 +159,7 @@ class SymbolTable{
         std::string typeOf(std::string name);
         int32_t indexOf(std::string name);
         bool is_defined(std::string name);
+        void startMethod();
 };
 
 class VMWriter{

@@ -264,6 +264,9 @@ JC_Subroutine* CompilationEngine::compileSubroutine()
     }
 
     symtbl.startSubroutine();
+    if(jt.keyword() == "method"){
+        symtbl.startMethod();
+    }
 
     JC_Subroutine*  subroutine = new JC_Subroutine();
     

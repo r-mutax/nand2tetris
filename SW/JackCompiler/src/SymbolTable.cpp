@@ -13,6 +13,8 @@ void SymbolTable::startSubroutine(){
 
     // change scope
     cur_scope = &func_scope;
+
+    is_method = false;
 }
 
 void SymbolTable::define(std::string name, std::string type, SYMBOL_KIND kind)
@@ -21,6 +23,9 @@ void SymbolTable::define(std::string name, std::string type, SYMBOL_KIND kind)
     entity.type = type;
     entity.kind = kind;
     entity.index = varCount(kind);
+    if(entity.kind == ARG){
+        entity.index += (is_method ? 1 : 0);
+    }
 
     (*cur_scope)[name] = entity;
 }
@@ -75,4 +80,9 @@ int32_t SymbolTable::indexOf(std::string name)
 
 bool SymbolTable::is_defined(std::string name){
     return func_scope.count(name) == 1 || class_scope.count(name) == 1;
+}
+
+void SymbolTable::startMethod(){
+    is_method = true;
+    return;
 }
