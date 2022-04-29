@@ -39,6 +39,7 @@ void JackTokenizer::readTokens()
         std::string linebuf;
         if(std::getline(m_ifs, linebuf))
         {
+            linebuf += " ";
             tokenizeLine(linebuf);
         } else {
             hasToken = false;
@@ -165,9 +166,15 @@ void JackTokenizer::tokenizeLine(std::string buf)
 bool JackTokenizer::isKeyWord(std::string buf, int32_t pos,std::string& str)
 {
     auto check = [buf, pos, &str](std::string keyword){
-        if(buf.compare(pos, keyword.length(), keyword) == 0){
-            str = keyword;
-            return true;
+        int32_t len = keyword.length();
+        if(buf.compare(pos, len, keyword) == 0){   
+            char c = buf[pos + len];         
+            if(!(('a' <= c && c <= 'z') || ('A' <= c && c <= 'Z') || ('0' <= c && c <= '9') || c == '_')){
+                str = keyword;
+                return true;
+            } else {
+                return false;
+            }
         } else {
             return false;
         }
